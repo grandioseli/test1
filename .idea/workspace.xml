@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
       <artifact name="javawebdemo:war exploded" />
     </artifacts-to-build>
   </component>
+=======
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35009231-7dc2-47e7-afc7-a9b643c232c9" name="Default Changelist" comment="">
+<<<<<<< HEAD
       <change afterPath="$PROJECT_DIR$/.idea/artifacts/javawebdemo_war.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/artifacts/javawebdemo_war_exploded.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
@@ -102,12 +106,31 @@
       <change afterPath="$PROJECT_DIR$/../yonyou/yts-test-support/.idea/modules.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../yonyou/yts-test-support/.idea/vcs.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../存储检测.docx" afterDir="false" />
+=======
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/demo1_war.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/demo1_war_exploded.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_annotations_2_12_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_core_2_12_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_databind_2_12_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_servlet_javax_servlet_api_4_0_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_7_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_engine_5_7_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_7_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_platform_junit_platform_engine_1_7_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo1/demo1.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo1/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo1/src/main/java/com/example/demo1/HelloServlet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo1/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo1/src/main/webapp/index.jsp" afterDir="false" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/ideaProject/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ideaProject/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,11 +140,14 @@
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="FavoritesManager">
     <favorites_list name="class1">
       <favorite_root url="Main" module="ideaProject" type="class" klass="com.intellij.ide.favoritesTreeView.smartPointerPsiNodes.ClassSmartPointerNode" />
     </favorites_list>
   </component>
+=======
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
   <component name="Git.Settings">
     <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -133,6 +159,7 @@
       </list>
     </option>
   </component>
+<<<<<<< HEAD
   <component name="LogFilters">
     <option name="FILTER_ERRORS" value="false" />
     <option name="FILTER_WARNINGS" value="false" />
@@ -145,6 +172,13 @@
       <MavenGeneralSettings>
         <option name="mavenHome" value="D:/maven/apache-maven-3.6.1-bin/apache-maven-3.6.1" />
         <option name="userSettingsFile" value="D:\maven\apache-maven-3.6.1-bin\apache-maven-3.6.1\conf\settings.xml" />
+=======
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="$PROJECT_DIR$/../maven/apache-maven-3.8.1-bin/apache-maven-3.8.1" />
+        <option name="userSettingsFile" value="D:\maven\apache-maven-3.8.1-bin\apache-maven-3.8.1\conf\settings.xml" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
       </MavenGeneralSettings>
     </option>
   </component>
@@ -154,7 +188,11 @@
     <option name="width" value="1400" />
     <option name="height" value="1000" />
   </component>
+<<<<<<< HEAD
   <component name="ProjectId" id="1vo8N7znEsRSQdPLqWww0QkiqhQ" />
+=======
+  <component name="ProjectId" id="1vhCoimsNoFHJFLbUOyQpuO9gRi" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -191,7 +229,11 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="jdk.selected.JAVA_MODULE" value="1.8" />
+<<<<<<< HEAD
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../yonyou/yts-test-support" />
+=======
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -201,7 +243,11 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
+<<<<<<< HEAD
   <component name="RunManager" selected="Application.Main">
+=======
+  <component name="RunManager">
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     <configuration name="Main" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="Main" />
       <module name="ideaProject" />
@@ -211,6 +257,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+<<<<<<< HEAD
     <configuration name="javawebdemo" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 10.0.8" ALTERNATIVE_JRE_ENABLED="false">
       <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8090/javawebdemo_war_exploded/" />
       <option name="UPDATING_POLICY" value="restart-server" />
@@ -304,6 +351,21 @@
       <item itemvalue="Application.Main" />
       <item itemvalue="Tomcat Server.javawebdemo" />
     </list>
+=======
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
@@ -321,9 +383,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626970014161</updated>
+<<<<<<< HEAD
       <workItem from="1627217042602" duration="8008000" />
       <workItem from="1627313038100" duration="875000" />
       <workItem from="1627322477610" duration="8000" />
+=======
+      <workItem from="1627005111876" duration="1680000" />
+      <workItem from="1627269641578" duration="3483000" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     </task>
     <servers />
   </component>
@@ -362,12 +429,12 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.History.Properties">
-    <option name="COLUMN_ORDER">
+    <option name="COLUMN_ID_ORDER">
       <list>
-        <option value="0" />
-        <option value="2" />
-        <option value="3" />
-        <option value="1" />
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
       </list>
     </option>
   </component>

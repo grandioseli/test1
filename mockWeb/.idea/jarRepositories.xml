@@ -2,7 +2,6 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
-<<<<<<< HEAD
       <option name="id" value="YHTCloud-Release" />
       <option name="name" value="YHTCloud-Release" />
       <option name="url" value="http://maven.yonyou.com/nexus/content/repositories/YHTCloud-Release/" />
@@ -11,11 +10,6 @@
       <option name="id" value="YHTCloud-Snapshot" />
       <option name="name" value="YHTCloud-Snapshot" />
       <option name="url" value="http://maven.yonyou.com/nexus/content/repositories/YHTCloud-Snapshot/" />
-=======
-      <option name="id" value="central" />
-      <option name="name" value="Central Repository" />
-      <option name="url" value="https://repo.maven.apache.org/maven2" />
->>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
@@ -23,7 +17,6 @@
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
     <remote-repository>
-<<<<<<< HEAD
       <option name="id" value="nexus" />
       <option name="name" value="Nexus" />
       <option name="url" value="http://maven.yonyou.com/nexus/content/groups/public" />
@@ -99,17 +92,9 @@
       <option name="url" value="http://maven.yonyou.com/nexus/content/repositories/3rdsnapshot" />
     </remote-repository>
     <remote-repository>
-=======
->>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
-    </remote-repository>
-<<<<<<< HEAD
-    <remote-repository>
-      <option name="id" value="central" />
-      <option name="name" value="Central Repository" />
-      <option name="url" value="http://maven.aliyun.com/nexus/content/groups/public" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="nccloud-snapshots" />
@@ -131,7 +116,5 @@
       <option name="name" value="iUAP-Snapshots" />
       <option name="url" value="http://maven.yonyou.com/nexus/content/repositories/iUAP-Snapshots/" />
     </remote-repository>
-=======
->>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
   </component>
 </project>
