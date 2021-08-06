@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/demo1/demo1.iml" filepath="$PROJECT_DIR$/demo1/demo1.iml" />
       <module fileurl="file://$PROJECT_DIR$/ideaProject.iml" filepath="$PROJECT_DIR$/ideaProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javawebdemo/javawebdemo.iml" filepath="$PROJECT_DIR$/javawebdemo/javawebdemo.iml" />
     </modules>
   </component>
 </project>

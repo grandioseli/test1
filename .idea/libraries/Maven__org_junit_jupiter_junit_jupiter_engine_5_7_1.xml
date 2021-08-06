@@ -1,6 +1,15 @@
 <component name="libraryTable">
   <library name="Maven: org.junit.jupiter:junit-jupiter-engine:5.7.1">
     <CLASSES>
+<<<<<<< HEAD
+      <root url="jar://C:/Users/Administrator/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.7.1/junit-jupiter-engine-5.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://C:/Users/Administrator/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.7.1/junit-jupiter-engine-5.7.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://C:/Users/Administrator/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.7.1/junit-jupiter-engine-5.7.1-sources.jar!/" />
+=======
       <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-engine/5.7.1/junit-jupiter-engine-5.7.1.jar!/" />
     </CLASSES>
     <JAVADOC>
@@ -8,6 +17,7 @@
     </JAVADOC>
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-engine/5.7.1/junit-jupiter-engine-5.7.1-sources.jar!/" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     </SOURCES>
   </library>
 </component>

@@ -16,11 +16,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+<<<<<<< HEAD
+        <module name="javawebdemo" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="javawebdemo" target="1.8" />
+=======
         <module name="demo1" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8">
       <module name="demo1" target="1.8" />
+>>>>>>> c3e067eacd21b8335f1c571d4cf446234004d964
     </bytecodeTargetLevel>
   </component>
 </project>
