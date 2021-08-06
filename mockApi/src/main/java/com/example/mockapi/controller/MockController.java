@@ -3,6 +3,7 @@ package com.example.mockapi.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.mockapi.utils.urlUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,8 @@ import java.util.Arrays;
 @Controller
 @RequestMapping("/yts/")
 public class MockController {
+    @Value("${yts.mock.url}")
+    private String ytsMockUrl;
     //    @RequestMapping("MockApiForJson")
 //    public Object returnLink(@RequestBody JSONObject jsonObject) throws UnsupportedEncodingException {
 //        String mockUrl = jsonObject.toJSONString();
@@ -31,11 +34,13 @@ public class MockController {
 //        return JSON.parseObject(jsonString);
 //    }
     @CrossOrigin(origins = "*", maxAge = 3600)
-    @RequestMapping("returnJson")
+    @RequestMapping("setMock")
     @ResponseBody
-    public Object returnJson(String tenant, String documentType, String action, String ruleId, String act, String type, String msg, String position, String invokePosition, Integer timeout) throws UnsupportedEncodingException {
+    public Object setMock(String tenant, String documentType, String action, String ruleId, String act, String type, String msg, String position, String invokePosition, Integer timeout) throws UnsupportedEncodingException {
         String mockKey = "";
         mockKey = tenant + "_" + documentType + "_" + action + "_" + ruleId + "_" + act;
+        mockKey = mockKey.replace("_null","");
+//        System.out.println(mockKey);
         JSONObject mock = new JSONObject();
         JSONObject mockException = new JSONObject();
         if(type!=null) {
@@ -54,18 +59,19 @@ public class MockController {
             mockException.put("timeout", timeout);
         }
         mock.put(mockKey, mockException);
-//        String mockUrl = mock.toJSONString();
-//        mockUrl = URLEncoder.encode(mockUrl,"utf-8");
-//        String url = "http://yts-demo-pay.daily.app.yyuap.com/yts/test/api/mock/set_mock?mock="+mockUrl;
-//        String result = urlUtil.sendGet(url);
-//        return result;
-        System.out.println(mock);
-        return mock;
+        String mockUrl = mock.toJSONString();
+        mockUrl = URLEncoder.encode(mockUrl,"utf-8");
+        String url = ytsMockUrl+"set_mock?mock="+mockUrl;
+        String result = urlUtil.sendGet(url);
+//        JSONObject jsonobj = JSON.parseObject(result);
+        return result;
+//        System.out.println(mock);
+//        return mock;
     }
     @CrossOrigin(origins = "*", maxAge = 3600)
-    @RequestMapping("setMock")
+    @RequestMapping("setMocks")
     @ResponseBody
-    public Object setMock(@RequestParam(value = "tenant[]", required = false) String[] tenant, @RequestParam(value = "documentType[]", required = false) String[] documentType,
+    public Object setMocks(@RequestParam(value = "tenant[]", required = false) String[] tenant, @RequestParam(value = "documentType[]", required = false) String[] documentType,
                               @RequestParam(value = "action[]", required = false) String[] action, @RequestParam(value = "ruleId[]", required = false) String[] ruleId, @RequestParam(value = "act[]", required = false) String[] act,
                               @RequestParam(value = "type[]", required = false) String[] type, @RequestParam(value = "msg[]", required = false) String[] msg,
                               @RequestParam(value = "position[]" ,required = false) String[] position, @RequestParam(value = "invokePosition[]", required = false) String[] invokePosition, @RequestParam(value = "timeout[]", required = false) Integer[] timeout) throws UnsupportedEncodingException {
@@ -95,7 +101,15 @@ public class MockController {
 //        return mock;
         String mockUrl = mock.toJSONString();
         mockUrl = URLEncoder.encode(mockUrl, "utf-8");
-        String url = "http://yts-demo-pay.daily.app.yyuap.com/yts/test/api/mock/set_mock?mock=" + mockUrl;
+        String url = ytsMockUrl + "set_mock?mock="+mockUrl;
+        String result = urlUtil.sendGet(url);
+        return result;
+    }
+    @CrossOrigin(origins = "*", maxAge = 3600)
+    @RequestMapping("clearMock")
+    @ResponseBody
+    public Object clearMock() {
+        String url = ytsMockUrl + "clear_mock";
         String result = urlUtil.sendGet(url);
         return result;
     }
