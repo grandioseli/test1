@@ -15,39 +15,39 @@ import java.util.List;
 @Controller
 @RequestMapping("/yts/")
 public class MockController {
-    /**
-     * 创建配置文件，格式为json，key为“yts.mock”，value为空
-     *
-     * @param fileName 配置文件名，如果当前目录没有该文件则创建
-     *                 若不需要创建文件则删除本方法
-     */
-    @RequestMapping("createMockFile")
-    @ResponseBody
-    public Object createMockFile(String fileName) throws IOException {
-        //
-        File file = new File(fileName);
-        //如果文件不存在则创建文件并在文件里面预设好yts.mock，value为空
-        if (!file.exists()) {
-            file.createNewFile();
-            try {
-                FileOutputStream fos = new FileOutputStream(file, true);
-                OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
-                BufferedWriter bw = new BufferedWriter(out);
-                JSONObject ytsMockObj = new JSONObject();
-                String ytsMock = "yts.mock";
-                JSONObject obj = new JSONObject();
-                ytsMockObj.put(ytsMock, obj);
-                String mockUrl = ytsMockObj.toJSONString();
-                bw.write(mockUrl);
-                bw.flush();
-                bw.close();
-                return "success";
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "该文件已经存在";
-    }
+//    /**
+//     * 创建配置文件，格式为json，key为“yts.mock”，value为空
+//     *
+//     * @param fileName 配置文件名，如果当前目录没有该文件则创建
+//     *                 若不需要创建文件则删除本方法
+//     */
+//    @RequestMapping("createMockFile")
+//    @ResponseBody
+//    public Object createMockFile(String fileName) throws IOException {
+//        //
+//        File file = new File(fileName);
+//        //如果文件不存在则创建文件并在文件里面预设好yts.mock，value为空
+//        if (!file.exists()) {
+//            file.createNewFile();
+//            try {
+//                FileOutputStream fos = new FileOutputStream(file, true);
+//                OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
+//                BufferedWriter bw = new BufferedWriter(out);
+//                JSONObject ytsMockObj = new JSONObject();
+//                String ytsMock = "yts.mock";
+//                JSONObject obj = new JSONObject();
+//                ytsMockObj.put(ytsMock, obj);
+//                String mockUrl = ytsMockObj.toJSONString();
+//                bw.write(mockUrl);
+//                bw.flush();
+//                bw.close();
+//                return "success";
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return "该文件已经存在";
+//    }
 
     /**
      * 向配置文件中添加桩信息,用作增加数据和修改数据接口，如果key相同则为修改数据，如果key不同则为增加数据
@@ -161,7 +161,52 @@ public class MockController {
             reader.close();
             String jsonStr = sb.toString();
             JSONObject jsonobj = JSON.parseObject(jsonStr);
-            JSONObject mockException = jsonobj.getJSONObject("yts.mock");
+            //说明配置文件里没有json数据
+            if(jsonobj == null)
+            {
+                System.out.println("文件里没有json格式的数据");
+                FileOutputStream fos = new FileOutputStream(jsonFile, true);
+                OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
+                BufferedWriter bw = new BufferedWriter(out);
+                JSONObject ytsMockObj = new JSONObject();
+                String ytsMock = "yts.mock";
+                JSONObject obj = new JSONObject();
+                ytsMockObj.put(ytsMock, obj);
+                String mockUrl = ytsMockObj.toJSONString();
+                bw.write(mockUrl);
+                bw.flush();
+                bw.close();
+            }
+            //说明配置文件里有json数据，但是没有"yts.mock"
+            else if(!jsonobj.containsKey("yts.mock"))
+            {
+                System.out.println("json里没找到'yts.mock'");
+                FileOutputStream fos = new FileOutputStream(jsonFile, true);
+                OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
+                BufferedWriter bw = new BufferedWriter(out);
+                JSONObject ytsMockObj = new JSONObject();
+                String ytsMock = "yts.mock";
+                JSONObject obj = new JSONObject();
+                ytsMockObj.put(ytsMock, obj);
+                String mockUrl = ytsMockObj.toJSONString();
+                bw.write(mockUrl);
+                bw.flush();
+                bw.close();
+            }
+            //读取配置文件并转化为json格式
+            File jsonFile2 = new File(fileName);
+            FileReader fileReader2 = new FileReader(jsonFile2);
+            Reader reader2 = new InputStreamReader(new FileInputStream(jsonFile2), "utf-8");
+            int ch2 = 0;
+            StringBuffer sb2 = new StringBuffer();
+            while ((ch2 = reader2.read()) != -1) {
+                sb2.append((char) ch2);
+            }
+            fileReader2.close();
+            reader2.close();
+            String jsonStr2 = sb2.toString();
+            JSONObject jsonobj2 = JSON.parseObject(jsonStr2);
+            JSONObject mockException = jsonobj2.getJSONObject("yts.mock");
             //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:打桩数据，仍然是一个json对象），将它的keyset提取出来并遍历
             //由于key可能是拼接而成的，因此不对外层的json做转化，只对内层的value做转化，将key进行手赋值
             Iterator<String> its = mockException.keySet().iterator();

@@ -50,7 +50,6 @@ public class Mock {
         switch (this.model) {
             case "mdd": {
                 String[] strARR = id.split("_");
-                System.out.println(strARR);
                 this.tenant = strARR[0];
                 this.documentType = strARR[1];
                 this.act = strARR[2];
