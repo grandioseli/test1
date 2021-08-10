@@ -1,165 +1,72 @@
 package com.example.mockapi.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.example.mockapi.domain.mock;
-import com.example.mockapi.utils.urlUtil;
+import com.example.mockapi.domain.Mock;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 @RequestMapping("/yts/")
 public class MockController {
-    @Value("${yts.mock.url}")
-    private String ytsMockUrl;
-    //    @RequestMapping("MockApiForJson")
-//    public Object returnLink(@RequestBody JSONObject jsonObject) throws UnsupportedEncodingException {
-//        String mockUrl = jsonObject.toJSONString();
-//        mockUrl = URLEncoder.encode(mockUrl,"utf-8");
-//        return mockUrl;
-//    }
-//    @RequestMapping("MockApiForJsonString")
-//    public Object returnLink(String jsonString) throws UnsupportedEncodingException {
-//        JSONObject jsonobj = JSON.parseObject(jsonString);
-//        String mockUrl = jsonobj.toJSONString();
-//        return URLEncoder.encode(jsonString,"utf-8");
-//    }
-//    @RequestMapping("JsonObject")
-//    public Object returnJson(String jsonString) {
-//        return JSON.parseObject(jsonString);
-//    }
-//    @CrossOrigin(origins = "*", maxAge = 3600)
-//    @RequestMapping("setMock")
-//    @ResponseBody
-//    public Object setMock(String tenant, String documentType, String act, String ruleId, String action, String type, String msg, String position, String invokePosition, Integer timeout) throws UnsupportedEncodingException {
-//        String mockKey = "";
-//        mockKey = tenant + "_" + documentType + "_" + act + "_" + ruleId + "_" + action;
-//        mockKey = mockKey.replace("_null","");
-//        System.out.println(mockKey);
-//        JSONObject mock = new JSONObject();
-//        JSONObject mockException = new JSONObject();
-//        if(type!=null) {
-//            mockException.put("type", type);
-//        }
-//        if(msg!=null) {
-//            mockException.put("msg", msg);
-//        }
-//        if(position!=null) {
-//            mockException.put("position", position);
-//        }
-//        if(invokePosition!=null) {
-//            mockException.put("invokePosition", invokePosition);
-//        }
-//        if(timeout!=null) {
-//            mockException.put("timeout", timeout);
-//        }
-//        mock.put(mockKey, mockException);
-//        String mockUrl = mock.toJSONString();
-//        mockUrl = URLEncoder.encode(mockUrl,"utf-8");
-//        String url = ytsMockUrl+"set_mock?mock="+mockUrl;
-//        String result = urlUtil.sendGet(url);
-//        JSONObject jsonobj = JSON.parseObject(result);
-//        return result;
-//        System.out.println(mock);
-//        return mock;
-//    }
-//    @CrossOrigin(origins = "*", maxAge = 3600)
-//    @RequestMapping("setMocks")
-//    @ResponseBody
-//    public Object setMocks(@RequestParam(value = "tenant[]", required = false) String[] tenant, @RequestParam(value = "documentType[]", required = false) String[] documentType,
-//                              @RequestParam(value = "act[]", required = false) String[] act, @RequestParam(value = "ruleId[]", required = false) String[] ruleId, @RequestParam(value = "action[]", required = false) String[] action,
-//                              @RequestParam(value = "type[]", required = false) String[] type, @RequestParam(value = "msg[]", required = false) String[] msg,
-//                              @RequestParam(value = "position[]" ,required = false) String[] position, @RequestParam(value = "invokePosition[]", required = false) String[] invokePosition, @RequestParam(value = "timeout[]", required = false) Integer[] timeout) throws UnsupportedEncodingException {
-//        int number = tenant.length;
-//        JSONObject mock = new JSONObject();
-//        for (int i = 0; i < number; i++) {
-//            String mockKey = "";
-//            mockKey = tenant[i] + "_" + documentType[i] + "_" + act[i] + "_" + ruleId[i] + "_" + action[i];
-//            JSONObject mockException = new JSONObject();
-//            if(type!=null) {
-//                mockException.put("type", type[i]);
-//            }
-//            if(msg!=null) {
-//                mockException.put("msg", msg[i]);
-//            }
-//            if(position!=null) {
-//                mockException.put("position", position[i]);
-//            }
-//            if(invokePosition!=null) {
-//                mockException.put("invokePosition", invokePosition[i]);
-//            }
-//            if (timeout != null) {
-//                mockException.put("timeout", timeout[i]);
-//            }
-//            mock.put(mockKey, mockException);
-//        }
-//        return mock;
-//        String mockUrl = mock.toJSONString();
-//        mockUrl = URLEncoder.encode(mockUrl, "utf-8");
-//        String url = ytsMockUrl + "set_mock?mock="+mockUrl;
-//        String result = urlUtil.sendGet(url);
-//        return result;
-//    }
-//    @CrossOrigin(origins = "*", maxAge = 3600)
-//    @RequestMapping("clearMock")
-//    @ResponseBody
-//    public Object clearMock() {
-//        String url = ytsMockUrl + "clear_mock";
-//        String result = urlUtil.sendGet(url);
-//        return result;
-//    }
     /**
-    创建配置文件，格式为json，key为“yts.mock”，value为空
-    若不需要创建文件则删除本方法
+     * 创建配置文件，格式为json，key为“yts.mock”，value为空
+     *
+     * @param fileName 配置文件名，如果当前目录没有该文件则创建
+     *                 若不需要创建文件则删除本方法
      */
     @RequestMapping("createMockFile")
     @ResponseBody
     public Object createMockFile(String fileName) throws IOException {
         //
-        File file =new File(fileName);
-        if(!file.exists())
-        {
-            System.out.println("不存在");
-            System.out.println(file.createNewFile());
+        File file = new File(fileName);
+        //如果文件不存在则创建文件并在文件里面预设好yts.mock，value为空
+        if (!file.exists()) {
             file.createNewFile();
+            try {
+                FileOutputStream fos = new FileOutputStream(file, true);
+                OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
+                BufferedWriter bw = new BufferedWriter(out);
+                JSONObject ytsMockObj = new JSONObject();
+                String ytsMock = "yts.mock";
+                JSONObject obj = new JSONObject();
+                ytsMockObj.put(ytsMock, obj);
+                String mockUrl = ytsMockObj.toJSONString();
+                bw.write(mockUrl);
+                bw.flush();
+                bw.close();
+                return "success";
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        FileOutputStream fos = new FileOutputStream(file,true);
-        OutputStreamWriter out =new OutputStreamWriter(fos,"utf-8");
-        BufferedWriter bw = new BufferedWriter(out);
-        JSONObject ytsMockObj = new JSONObject();
-        String ytsMock = "yts.mock";
-        JSONObject obj= new JSONObject();
-        ytsMockObj.put(ytsMock,obj);
-        String mockUrl = ytsMockObj.toJSONString();
-        bw.write(mockUrl);
-        bw.flush();
-        bw.close();
-        return "success";
+        return "该文件已经存在";
     }
+
     /**
-    向配置文件中添加桩信息
+     * 向配置文件中添加桩信息,用作增加数据和修改数据接口，如果key相同则为修改数据，如果key不同则为增加数据
+     *
+     * @param fileName 配置文件名
+     * @param model    打桩模式（用于判断key是否需要拼接）
+     * @param mockobj  用于承接传入的打桩数据
      */
     @RequestMapping("addMock")
     @ResponseBody
-    public Object addMock(String fileName,String model,mock mockobj) throws IOException {
+    public Object addMock(String fileName, String model, Mock mockobj) throws IOException {
         File file = new File(fileName);
-        //读取配置文件中的json对象
+        //读取配置文件中的json对象，这里的做法是：每次新增/修改一个打桩项，首先读取原有的json数据并做修改，然后清空配置文件
+        //将组成的新的json数据写入文件
         JSONObject jsonobj;
         try {
             File jsonFile = new File(fileName);
             FileReader fileReader = new FileReader(jsonFile);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile),"utf-8");
+            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
             int ch = 0;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {
@@ -169,14 +76,13 @@ public class MockController {
             reader.close();
             String jsonStr = sb.toString();
             jsonobj = JSON.parseObject(jsonStr);
-//            System.out.println(jsonobj);
             //清空文件
-            File file2 =new File(fileName);
+            File file2 = new File(fileName);
             try {
-                if(!file2.exists()) {
+                if (!file2.exists()) {
                     file2.createNewFile();
                 }
-                FileWriter fileWriter =new FileWriter(file2);
+                FileWriter fileWriter = new FileWriter(file2);
                 fileWriter.write("");
                 fileWriter.flush();
                 fileWriter.close();
@@ -188,35 +94,39 @@ public class MockController {
             return null;
         }
         //读取传入的数据并结合原有的json对象，将其写入文件
-        FileOutputStream fos = new FileOutputStream(file,true);
-        OutputStreamWriter out =new OutputStreamWriter(fos,"utf-8");
+        FileOutputStream fos = new FileOutputStream(file, true);
+        OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
         BufferedWriter bw = new BufferedWriter(out);
-        JSONObject ytsMockObj = new JSONObject();
         String mockKey = "";
-        mockobj.setId(model);
+        //根据模式设定key
+        mockobj.setIdBymodel(model);
         mockKey = mockobj.getId();
-//        System.out.println(mockKey);
+        //新增的数据为JSONObject对象，上面key有了，下面组装value
         JSONObject mock = new JSONObject();
+        //value也是JSONObject对象，它的各个值都是由前端传入
         JSONObject mockException = new JSONObject();
-        if(mockobj.getType()!=null) {
+        if (mockobj.getType() != null) {
             mockException.put("type", mockobj.getType());
         }
-        if(mockobj.getMsg()!=null) {
+        if (mockobj.getMsg() != null) {
             mockException.put("msg", mockobj.getMsg());
         }
-        if(mockobj.getPosition()!=null) {
+        if (mockobj.getPosition() != null) {
             mockException.put("position", mockobj.getPosition());
         }
-        if(mockobj.getInvokePosition()!=null) {
+        if (mockobj.getInvokePosition() != null) {
             mockException.put("invokePosition", mockobj.getInvokePosition());
         }
-        if(mockobj.getTimeout()!=null) {
+        if (mockobj.getTimeout() != null) {
             mockException.put("timeout", mockobj.getTimeout());
         }
+        //组装
         mock.put(mockKey, mockException);
+        //原先的yts.mock的value
         JSONObject jsonObject = jsonobj.getJSONObject("yts.mock");
-        System.out.println(jsonObject);
-        jsonObject.put(mockKey,mockException);
+        //新增数据
+        jsonObject.put(mockKey, mockException);
+        //写入数据并关闭流
         String mockUrl = jsonobj.toJSONString();
         bw.write(mockUrl);
         bw.write("\r\n");
@@ -225,17 +135,21 @@ public class MockController {
         System.out.println("写入成功！");
         return "success";
     }
+
+    /**
+     * @param fileName 配置文件名，根据配置文件名查询内容。
+     * @return 返回对象为list, 值为mock实体类
+     */
     @RequestMapping("getMock")
     @ResponseBody
     public Object getMock(String fileName) {
-        File file = new File(fileName);
-        mock mock;
+        //用于将json转化为实体类
         ObjectMapper mapper = new ObjectMapper();
         try {
             //读取配置文件并转化为json格式
             File jsonFile = new File(fileName);
             FileReader fileReader = new FileReader(jsonFile);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile),"utf-8");
+            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
             int ch = 0;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {
@@ -246,13 +160,73 @@ public class MockController {
             String jsonStr = sb.toString();
             JSONObject jsonobj = JSON.parseObject(jsonStr);
             JSONObject mockException = jsonobj.getJSONObject("yts.mock");
-            String temp = mockException.toJSONString();
-            mock = mapper.readValue(temp,mock.class);//Json对象转为实体对象
-            List<mock> trainTypeList = mock.getTrainTypeList();
-//            List<List<String>> mlist = new LinkedList<>();
-            //将json存放到list中
-//            List<JSONObject> mlist = new LinkedList<>();
-            return trainTypeList;
+            //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:打桩数据，仍然是一个json对象），将它的keyset提取出来并遍历
+            //由于key可能是拼接而成的，因此不对外层的json做转化，只对内层的value做转化，将key进行手赋值
+            Iterator<String> its = mockException.keySet().iterator();
+            List<Mock> list = new ArrayList<>();
+            while (its.hasNext()) {
+                //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
+                String key = its.next();
+                Mock mock = new Mock();
+                JSONObject temp = mockException.getJSONObject(key);
+                String temp1 = temp.toJSONString();
+                mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
+                mock.setId(key);
+                list.add(mock);
+            }
+            return list;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * @param fileName 配置文件名称
+     * @param mock     桩实体类，实际上删除只需要提供id
+     * @return 无返回，这里象征性的返回success
+     * 实际上，这个方法很可能没用
+     */
+    @RequestMapping("deleteMock")
+    @ResponseBody
+    public Object deleteMock(String fileName, Mock mock) {
+        try {
+            //读取配置文件并转化为json格式
+            File jsonFile = new File(fileName);
+            FileReader fileReader = new FileReader(jsonFile);
+            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
+            int ch = 0;
+            StringBuffer sb = new StringBuffer();
+            while ((ch = reader.read()) != -1) {
+                sb.append((char) ch);
+            }
+            fileReader.close();
+            reader.close();
+            String jsonStr = sb.toString();
+            JSONObject jsonobj = JSON.parseObject(jsonStr);
+            JSONObject mockException = jsonobj.getJSONObject("yts.mock");
+            mockException.remove(mock.getId());
+            //清空文件
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("");
+            fileWriter.flush();
+            fileWriter.close();
+            //读取传入的数据并结合原有的json对象，将其写入文件
+            FileOutputStream fos = new FileOutputStream(file, true);
+            OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
+            BufferedWriter bw = new BufferedWriter(out);
+            //写入数据并关闭流
+            String mockUrl = jsonobj.toJSONString();
+            bw.write(mockUrl);
+            bw.write("\r\n");
+            bw.flush();
+            bw.close();
+            System.out.println("删除成功！");
+            return "success";
         } catch (IOException e) {
             e.printStackTrace();
             return null;

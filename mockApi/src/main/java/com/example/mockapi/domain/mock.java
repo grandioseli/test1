@@ -7,21 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *      model 模式
- *      tenant 租户id
- *      documentType 单据类型
- *      act 动作
- *      ruleId 打桩规则
- *      action 不知道怎么解释
- *      type 类型
- *      msg 信息
- *      position 打桩位置？
- *      invokePosition ?
- *      timeout 超时时间
+ * model 模式
+ * tenant 租户id
+ * documentType 单据类型
+ * act 动作
+ * ruleId 打桩规则
+ * action 不知道怎么解释
+ * type 类型
+ * msg 信息
+ * position 打桩位置？
+ * invokePosition ?
+ * timeout 超时时间
+ * id 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
  */
 @Data
-public class mock implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Mock {
     private String tenant;
     private String documentType;
     private String act;
@@ -33,18 +33,16 @@ public class mock implements Serializable {
     private String invokePosition;
     private Integer timeout;
     private String id;
-    private List<mock> trainTypeList = new ArrayList<mock>();
-    public void setId(String model)
-    {
-        switch(model){
-            case "mdd":
-                id = tenant+'_'+documentType+'_'+act+'_'+ruleId+'_'+action;
-                id.replace("_null","");
-        }
-    }
-    public String getId()
-    {
 
-        return id;
+    //    private List<Mock> trainTypeList = new ArrayList<Mock>();
+    public void setIdBymodel(String model) {
+        switch (model) {
+            case "mdd":
+                id = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
+                id.replace("_null", "");
+                break;
+            case "http":
+            case "iris":
+        }
     }
 }
