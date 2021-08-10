@@ -1,1 +1,1 @@
-{"yts.mock":{"cwginzia_79e733c12_cancel_payServiceTccRule_save":{"msg":"TCC模式模拟正向异常","position":"REAR","type":"sql","invokePosition":"CALL_SERVICE","timeout":44},"cwginzia_79e733c12_cancel_payServiceTccRule_sav":{"msg":"TCC模式模拟正向异常","position":"REAR","type":"sql","timeout":44}}}
+{"yts.mock":{}}

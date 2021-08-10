@@ -52,13 +52,12 @@ public class MockController {
     /**
      * 向配置文件中添加桩信息,用作增加数据和修改数据接口，如果key相同则为修改数据，如果key不同则为增加数据
      *
-     * @param fileName 配置文件名
-     * @param model    打桩模式（用于判断key是否需要拼接）
+     * @param fileName 配置文件
      * @param mockobj  用于承接传入的打桩数据
      */
     @RequestMapping("addMock")
     @ResponseBody
-    public Object addMock(String fileName, String model, Mock mockobj) throws IOException {
+    public Object addMock(String fileName, Mock mockobj) throws IOException {
         File file = new File(fileName);
         //读取配置文件中的json对象，这里的做法是：每次新增/修改一个打桩项，首先读取原有的json数据并做修改，然后清空配置文件
         //将组成的新的json数据写入文件
@@ -77,12 +76,11 @@ public class MockController {
             String jsonStr = sb.toString();
             jsonobj = JSON.parseObject(jsonStr);
             //清空文件
-            File file2 = new File(fileName);
             try {
-                if (!file2.exists()) {
-                    file2.createNewFile();
+                if (!file.exists()) {
+                    file.createNewFile();
                 }
-                FileWriter fileWriter = new FileWriter(file2);
+                FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write("");
                 fileWriter.flush();
                 fileWriter.close();
@@ -99,7 +97,7 @@ public class MockController {
         BufferedWriter bw = new BufferedWriter(out);
         String mockKey = "";
         //根据模式设定key
-        mockobj.setIdBymodel(model);
+        mockobj.setIdBymodel();
         mockKey = mockobj.getId();
         //新增的数据为JSONObject对象，上面key有了，下面组装value
         JSONObject mock = new JSONObject();
@@ -119,6 +117,10 @@ public class MockController {
         }
         if (mockobj.getTimeout() != null) {
             mockException.put("timeout", mockobj.getTimeout());
+        }
+        if(mockobj.getModel()!=null)
+        {
+            mockException.put("model",mockobj.getModel());
         }
         //组装
         mock.put(mockKey, mockException);
@@ -172,6 +174,7 @@ public class MockController {
                 String temp1 = temp.toJSONString();
                 mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
                 mock.setId(key);
+                mock.splitKey();
                 list.add(mock);
             }
             return list;
