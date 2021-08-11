@@ -96,7 +96,6 @@ public class MockController {
         bw.write("\r\n");
         bw.flush();
         bw.close();
-        System.out.println("写入成功！");
         return "success";
     }
 
@@ -206,7 +205,6 @@ public class MockController {
             bw.write("\r\n");
             bw.flush();
             bw.close();
-            System.out.println("删除成功！");
             return "success";
         } catch (IOException e) {
             e.printStackTrace();

@@ -16,6 +16,7 @@ import lombok.Data;
  * timeout 超时时间
  * id 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
  * model 桩的模式
+ * 123
  */
 @Data
 public class Mock {
