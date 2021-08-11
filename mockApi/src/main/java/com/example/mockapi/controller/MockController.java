@@ -61,7 +61,7 @@ public class MockController {
         String mockKey = "";
         //根据模式设定key
         mockobj.setIdBymodel();
-        mockKey = mockobj.getId();
+        mockKey = mockobj.getKey();
         //新增的数据为JSONObject对象
         JSONObject mock = new JSONObject();
         //value也是JSONObject对象，读取由前端传入的各个值
@@ -147,7 +147,7 @@ public class MockController {
                 JSONObject temp = mockException.getJSONObject(key);
                 String temp1 = temp.toJSONString();
                 mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
-                mock.setId(key);
+                mock.setKey(key);
                 try {
                     mock.splitKey();
                 }catch(ArrayIndexOutOfBoundsException e)
@@ -189,10 +189,10 @@ public class MockController {
                 return "删除失败：json数据中未找到yts.mock";
             }
             JSONObject mockException = jsonobj.getJSONObject("yts.mock");
-            if (!mockException.containsKey(mock.getId())) {
+            if (!mockException.containsKey(mock.getKey())) {
                 return "删除失败：yts.mock中没有找到key";
             }
-            mockException.remove(mock.getId());
+            mockException.remove(mock.getKey());
             //清空文件
             FileReaderUtil.cleanUpFile(file);
             //读取传入的数据并结合原有的json对象，将其写入文件

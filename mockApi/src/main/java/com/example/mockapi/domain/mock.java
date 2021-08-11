@@ -14,9 +14,8 @@ import lombok.Data;
  * position 打桩位置？
  * invokePosition ?
  * timeout 超时时间
- * id 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
+ * key 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
  * model 桩的模式
- * 
  */
 @Data
 public class Mock {
@@ -30,13 +29,13 @@ public class Mock {
     private String position;
     private String invokePosition;
     private Integer timeout;
-    private String id;
+    private String key;
     private String model;
 
     public void setIdBymodel() {
         switch (this.model) {
             case "mdd":
-                id = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
+                key = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
 //                id = id.replace("_null", "");
                 break;
             case "http":
@@ -49,7 +48,7 @@ public class Mock {
     public void splitKey() {
         switch (this.model) {
             case "mdd": {
-                String[] strARR = id.split("_");
+                String[] strARR = key.split("_");
                 this.tenant = strARR[0];
                 this.documentType = strARR[1];
                 this.act = strARR[2];
