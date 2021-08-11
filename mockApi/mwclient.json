@@ -1,1 +1,1 @@
-{"yts.mock":{"cancel_http://yh-mwclient-provider-yh.online.app.yyuap.com/yts/save1111":{"msg":"TCC模式模拟正向异常","model":"http","position":"REAR","type":"sql","invokePosition":"CALL_SERVICE","timeout":22}}}
+{"yts.mock":{"cwginzia_79e733c123_save_payServiceTccRule_cancel":{"msg":"TCC模式模拟正向异常","model":"mdd","position":"REAR","type":"sql","invokePosition":"CALL_SERVICE","timeout":60},"cwginzia_79e733c123_save_payServiceTccRule":{"msg":"TCC模式模拟正向异常","model":"mdd","position":"REAR","type":"sql","invokePosition":"CALL_SERVICE","timeout":60}}}

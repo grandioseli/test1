@@ -4,7 +4,6 @@ import lombok.Data;
 
 
 /**
- * model 模式
  * tenant 租户id
  * documentType 单据类型
  * act 动作
@@ -37,7 +36,7 @@ public class Mock {
         switch (this.model) {
             case "mdd":
                 id = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
-                id.replace("_null", "");
+                id = id.replace("_null", "");
                 break;
             case "http":
                 break;
