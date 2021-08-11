@@ -36,7 +36,7 @@ public class Mock {
         switch (this.model) {
             case "mdd":
                 id = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
-                id = id.replace("_null", "");
+//                id = id.replace("_null", "");
                 break;
             case "http":
                 break;

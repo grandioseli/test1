@@ -101,6 +101,8 @@ public class MockController {
     }
 
     /**
+     * 根据配置文件获取配置信息
+     *
      * @param fileName 配置文件路径
      * @return 返回对象为list, 值为mock实体类
      */
@@ -174,16 +176,7 @@ public class MockController {
         try {
             //读取配置文件并转化为json格式
             File file = new File(fileName);
-            FileReader fileReader = new FileReader(file);
-            Reader reader = new InputStreamReader(new FileInputStream(file), "utf-8");
-            int ch = 0;
-            StringBuffer sb = new StringBuffer();
-            while ((ch = reader.read()) != -1) {
-                sb.append((char) ch);
-            }
-            fileReader.close();
-            reader.close();
-            String jsonStr = sb.toString();
+            String jsonStr = FileReaderUtil.readStringFromFile(file);
             JSONObject jsonobj;
             try {
                 jsonobj = JSON.parseObject(jsonStr);
@@ -198,7 +191,7 @@ public class MockController {
             }
             JSONObject mockException = jsonobj.getJSONObject("yts.mock");
             if (!mockException.containsKey(mock.getId())) {
-                return "删除失败：yts.mock中没有具体key的信息";
+                return "删除失败：yts.mock中没有找到key";
             }
             mockException.remove(mock.getId());
             //清空文件
