@@ -1,1 +1,1 @@
-123
+{"yts.mock":{"null_null_null_null":{"msg":"TCC模式模拟正向异常","mode":"mdd","position":"REAR","type":"sql","invokePosition":"CALL_SERVICE","timeout":60}}}

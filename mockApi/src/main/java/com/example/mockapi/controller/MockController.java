@@ -6,13 +6,20 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.mockapi.domain.Mock;
 import com.example.mockapi.utils.FileReaderUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yonyou.cloud.auth.sdk.client.AuthSDKClient;
+import com.yonyou.cloud.auth.sdk.client.utils.http.EnumRequestType;
+import com.yonyou.cloud.auth.sdk.client.utils.http.HttpResult;
+import com.yonyou.cloud.middleware.PostMan;
+import com.yonyou.cloud.yts.config.YtsSpringContextHolder;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/yts/")
@@ -28,11 +35,18 @@ public class MockController {
     @RequestMapping("addMock")
     @ResponseBody
     public Object addMock(String fileName, Mock mockobj) throws IOException {
+        //根据文件路径打开文件
         File file = new File(fileName);
         //读取配置文件中的json对象，这里的做法是：每次新增/修改一个打桩项，首先读取原有的json数据并做修改，然后清空配置文件
         //将组成的新的json数据写入文件
         JSONObject jsonobj;
-        String jsonStr = FileReaderUtil.readStringFromFile(file);
+        String jsonStr;
+        try {
+            jsonStr = FileReaderUtil.readStringFromFile(file);
+        }catch(FileNotFoundException e)
+        {
+            return "添加失败：没有找到指定配置文件";
+        }
         //判断文件中的数据是否是json格式
         try {
             jsonobj = JSON.parseObject(jsonStr);
@@ -46,7 +60,7 @@ public class MockController {
             JSONObject obj = new JSONObject();
             jsonobj.put(ytsMock, obj);
         }
-        //如果顶级目标有json数据但是没有yts.mock节点
+        //如果有json数据但是顶层没有yts.mock节点，则添加yts.mock节点
         else if (!jsonobj.containsKey("yts.mock")) {
             String ytsMock = "yts.mock";
             JSONObject obj = new JSONObject();
@@ -59,8 +73,8 @@ public class MockController {
         OutputStreamWriter out = new OutputStreamWriter(fos, "utf-8");
         BufferedWriter bw = new BufferedWriter(out);
         String mockKey = "";
-        //根据模式设定key
-        mockobj.setIdBymodel();
+        //根据模式设定key并获取
+        mockobj.setKeyBymode();
         mockKey = mockobj.getKey();
         //新增的数据为JSONObject对象
         JSONObject mock = new JSONObject();
@@ -81,8 +95,8 @@ public class MockController {
         if (mockobj.getTimeout() != null) {
             mockException.put("timeout", mockobj.getTimeout());
         }
-        if (mockobj.getModel() != null) {
-            mockException.put("model", mockobj.getModel());
+        if (mockobj.getMode() != null) {
+            mockException.put("mode", mockobj.getMode());
         }
         //组装
         mock.put(mockKey, mockException);
@@ -113,13 +127,18 @@ public class MockController {
         try {
             //读取配置文件并转化为json格式
             File file = new File(fileName);
-            String jsonStr = FileReaderUtil.readStringFromFile(file);
+            String jsonStr;
+            try{
+                jsonStr = FileReaderUtil.readStringFromFile(file);
+            }catch(FileNotFoundException e){
+                return "获取失败:没有找到指定配置文件";
+            }
             JSONObject jsonobj;
             //判断文件中的数据是否是json格式
             try {
                 jsonobj = JSON.parseObject(jsonStr);
             } catch (JSONException i) {
-                return "获取失败：配置文件中的数据不是json格式！";
+                return "获取失败：配置文件中的数据不是json格式";
             }
             //配置文件里没有json数据或者有json数据却没有yts.mock,就添加这个节点
             //如果顶级目标中没有数据,需要重新创建json对象
@@ -143,17 +162,12 @@ public class MockController {
             while (its.hasNext()) {
                 //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
                 String key = its.next();
-                Mock mock = new Mock();
+                Mock mock;
                 JSONObject temp = mockException.getJSONObject(key);
                 String temp1 = temp.toJSONString();
                 mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
                 mock.setKey(key);
-                try {
-                    mock.splitKey();
-                }catch(ArrayIndexOutOfBoundsException e)
-                {
-                    mock.setAction(null);
-                }
+                mock.splitKey();
                 list.add(mock);
             }
             return list;
@@ -164,10 +178,11 @@ public class MockController {
     }
 
     /**
+     * 根据配置文件和key删除桩
+     *
      * @param fileName 配置文件名称
      * @param mock     桩实体类，实际上删除只需要提供id
      * @return 如果成功象征性的返回success
-     * 实际上，这个方法很可能没用
      */
     @RequestMapping("deleteMock")
     @ResponseBody
@@ -175,7 +190,13 @@ public class MockController {
         try {
             //读取配置文件并转化为json格式
             File file = new File(fileName);
-            String jsonStr = FileReaderUtil.readStringFromFile(file);
+            String jsonStr;
+            try {
+                jsonStr = FileReaderUtil.readStringFromFile(file);
+            }catch(FileNotFoundException e)
+            {
+                return "删除失败：没有找到指定配置文件";
+            }
             JSONObject jsonobj;
             try {
                 jsonobj = JSON.parseObject(jsonStr);
@@ -210,5 +231,44 @@ public class MockController {
             e.printStackTrace();
             return null;
         }
+    }
+    @RequestMapping("testget")
+    @ResponseBody
+    public Object testget() throws IOException {
+//        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com/confcenter/api/config/file?groupid=c87e2267-1001-4c70-bb2a-ab41f3b81aa3&app=rpc-provider-531&version=1.0.0&env=dev&key=mwclient.json")
+//                .get()
+//                .build();
+        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", "http://dc1.yms.app.yyuap.com/confcenter/api/config/file?groupid=c87e2267-1001-4c70-bb2a-ab41f3b81aa3&app=rpc-provider-531&version=1.0.0&env=dev&key=mwclient.json")
+                .get()
+                .build();
+        Call call = PostMan.getInstance().newCall(request);
+        Response response = call.execute();
+        return response.body().string();
+    }
+    @RequestMapping("testpost")
+    @ResponseBody
+    public Object testpost() throws IOException {
+        String json = "{\n" +
+                "    \"serviceCode\":\"rpc-provider-531\",\n" +
+                "    \"providerId\": \"c87e2267-1001-4c70-bb2a-ab41f3b81aa3\",\n" +
+                "    \"contentList\":[\n" +
+                "        {\n" +
+                "            \"version\":\"1.0.0\",\n" +
+                "            \"envId\": 1,\n" +
+                "            \"content\": \"{}\",\n" +
+                "            \"fileKey\": \"mwclient.json\"\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+                .post(body)
+                .build();
+//        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com/confcenter/api/config/file?groupid=c87e2267-1001-4c70-bb2a-ab41f3b81aa3&app=rpc-provider-531&version=1.0.0&env=dev&key=mwclient.json")
+//                .get()
+//                .build();
+        Call call = PostMan.getInstance().newCall(request);
+        Response response = call.execute();
+        return response.body().string();
     }
 }

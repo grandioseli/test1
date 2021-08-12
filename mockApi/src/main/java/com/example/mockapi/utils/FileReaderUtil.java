@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.io.*;
 
+/**
+ * 对文件的各个操作
+ */
 public class FileReaderUtil {
     //向指定文件内添加yts.mock节点
     public static void addYtsMock(File file) throws IOException {
@@ -32,6 +35,7 @@ public class FileReaderUtil {
         reader.close();
         return  sb.toString();
     }
+    //清空文件内容
     public static void cleanUpFile(File file) throws IOException {
         if (!file.exists()) {
             file.createNewFile();

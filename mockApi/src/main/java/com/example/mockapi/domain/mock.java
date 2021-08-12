@@ -15,7 +15,7 @@ import lombok.Data;
  * invokePosition ?
  * timeout 超时时间
  * key 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
- * model 桩的模式
+ * mode 桩的模式
  */
 @Data
 public class Mock {
@@ -30,13 +30,18 @@ public class Mock {
     private String invokePosition;
     private Integer timeout;
     private String key;
-    private String model;
+    private String mode;
 
-    public void setIdBymodel() {
-        switch (this.model) {
+    public void setKeyBymode() {
+        switch (this.mode) {
             case "mdd":
-                key = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
-//                id = id.replace("_null", "");
+                if(action !=null) {
+                    key = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
+                }
+                else
+                {
+                    key = tenant + '_' + documentType + '_' + act + '_' + ruleId;
+                }
                 break;
             case "http":
                 break;
@@ -46,14 +51,23 @@ public class Mock {
     }
 
     public void splitKey() {
-        switch (this.model) {
+        switch (this.mode) {
             case "mdd": {
                 String[] strARR = key.split("_");
-                this.tenant = strARR[0];
-                this.documentType = strARR[1];
-                this.act = strARR[2];
-                this.ruleId = strARR[3];
-                this.action = strARR[4];
+                if(strARR.length==5) {
+                    this.tenant = strARR[0];
+                    this.documentType = strARR[1];
+                    this.act = strARR[2];
+                    this.ruleId = strARR[3];
+                    this.action = strARR[4];
+                }
+                else
+                {
+                    this.tenant = strARR[0];
+                    this.documentType = strARR[1];
+                    this.act = strARR[2];
+                    this.ruleId = strARR[3];
+                }
                 break;
             }
             case "http":
