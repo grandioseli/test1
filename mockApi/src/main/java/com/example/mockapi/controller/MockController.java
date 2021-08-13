@@ -5,13 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.example.mockapi.domain.Mock;
-import com.example.mockapi.utils.FileReaderUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yonyou.cloud.auth.sdk.client.AuthSDKClient;
-import com.yonyou.cloud.auth.sdk.client.utils.http.EnumRequestType;
-import com.yonyou.cloud.auth.sdk.client.utils.http.HttpResult;
 import com.yonyou.cloud.middleware.PostMan;
-import com.yonyou.cloud.yts.config.YtsSpringContextHolder;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -46,13 +41,8 @@ public class MockController {
     public Object getMock(Mock mock,String msCode, String version,String envId,String file) throws IOException {
         //根据参数获取文件内容(JSONObject)
         ObjectMapper mapper = new ObjectMapper();
-        String url = mockUrl + "?groupid="+mock.getTenantId()+"&app="+msCode+"&version="+version+"&env="+envId+"&key="+file;
-        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", url)
-                .get()
-                .build();
-        Call call = PostMan.getInstance().newCall(request);
-        Response response = call.execute();
-        String fileString = response.body().string();
+        String url = mockUrl;
+        String fileString = (String) readFile(url,mock,msCode,version,envId,file);
         JSONObject fileJSON;
         try {
             fileJSON = JSON.parseObject(fileString);
@@ -157,6 +147,64 @@ public class MockController {
         JSONObject jsonObject = fileJSON.getJSONObject("yts.mock");
         //新增数据,到此就算把新的content组装好了
         jsonObject.put(mockKey, mockException);
+        fileString = fileJSON.toJSONString();
+        //下面组装请求的json
+        JSONObject requestJson = new JSONObject();
+        //微服务编码
+        requestJson.put("serviceCode",msCode);
+        //租户id
+        requestJson.put("providerId",mock.getTenantId());
+        JSONArray contentListArr = new JSONArray();
+        JSONObject contentListObj = new JSONObject();
+        contentListObj.put("version",version);
+        contentListObj.put("envId",1);
+        contentListObj.put("content",fileString);
+        contentListObj.put("fileKey",file);
+        contentListArr.add(contentListObj);
+        requestJson.put("contentList",contentListArr);
+        String requestString = requestJson.toJSONString();
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+                .post(body)
+                .build();
+        Call call = PostMan.getInstance().newCall(request);
+        Response response = call.execute();
+        return response.body().string();
+    }
+
+    /**
+     * 根据key删除指定的打桩数据
+     *
+     * @param mock 实体类，需要的是里面的tenantId和key
+     * @param msCode 微服务编码
+     * @param version 配置文件版本
+     * @param envId 环境id
+     * @param file 配置文件名称
+     * @return
+     * @throws IOException
+     */
+    @RequestMapping("removeMock")
+    @ResponseBody
+    public Object removeMock(Mock mock,String msCode,String version,String envId,String file) throws IOException {
+        //首先获取文件内容（JSONObject对象）
+        String fileString = (String) readFile(mockUrl,mock,msCode,version,envId,file);
+        JSONObject fileJSON;
+        try {
+            fileJSON = JSON.parseObject(fileString);
+        } catch (JSONException i) {
+            return "删除失败：配置文件中的数据不是json格式！";
+        }
+        if (fileJSON == null) {
+            return "删除失败：配置文件中没有数据";
+        }
+        if (!fileJSON.containsKey("yts.mock")) {
+            return "删除失败：json数据中未找到yts.mock";
+        }
+        JSONObject mockException = fileJSON.getJSONObject("yts.mock");
+        if (!mockException.containsKey(mock.getKey())) {
+            return "删除失败：yts.mock中没有找到key";
+        }
+        mockException.remove(mock.getKey());
         fileString = fileJSON.toJSONString();
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
