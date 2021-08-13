@@ -4,7 +4,7 @@ import lombok.Data;
 
 
 /**
- * tenant 租户id
+ * groupId 租户id
  * documentType 单据类型
  * act 动作
  * ruleId 打桩规则
@@ -19,7 +19,7 @@ import lombok.Data;
  */
 @Data
 public class Mock {
-    private String tenant;
+    private String tenantId;
     private String documentType;
     private String act;
     private String ruleId;
@@ -32,15 +32,16 @@ public class Mock {
     private String key;
     private String mode;
 
+
     public void setKeyBymode() {
         switch (this.mode) {
             case "mdd":
                 if(action !=null) {
-                    key = tenant + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
+                    key = tenantId + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
                 }
                 else
                 {
-                    key = tenant + '_' + documentType + '_' + act + '_' + ruleId;
+                    key = tenantId + '_' + documentType + '_' + act + '_' + ruleId;
                 }
                 break;
             case "http":
@@ -55,7 +56,7 @@ public class Mock {
             case "mdd": {
                 String[] strARR = key.split("_");
                 if(strARR.length==5) {
-                    this.tenant = strARR[0];
+                    this.tenantId = strARR[0];
                     this.documentType = strARR[1];
                     this.act = strARR[2];
                     this.ruleId = strARR[3];
@@ -63,7 +64,7 @@ public class Mock {
                 }
                 else
                 {
-                    this.tenant = strARR[0];
+                    this.tenantId = strARR[0];
                     this.documentType = strARR[1];
                     this.act = strARR[2];
                     this.ruleId = strARR[3];
