@@ -93,7 +93,7 @@ public class MockController {
      * @param version 配置文件版本
      * @param envId   环境id
      * @param file    配置文件名称
-     * @return
+     * @return 返回添加信息
      * @throws IOException
      */
     @RequestMapping("addMock")
@@ -120,7 +120,7 @@ public class MockController {
             JSONObject obj = new JSONObject();
             fileJSON.put(ytsMock, obj);
         }
-        String mockKey = "";
+        String mockKey;
         //下面向yts.mock节点增加数据
         //根据模式设定key并获取
         mock.setKeyByMode();
@@ -299,7 +299,7 @@ public class MockController {
         String kkk = kk.toJSONString();
         JSONObject temp = JSON.parseObject(json);
         JSONArray temp1 = temp.getJSONArray("contentList");
-        temp1.getJSONObject(0).put("content", 123);
+        temp1.getJSONObject(0).put("content", kkk);
         String json1 = temp.toJSONString();
         System.out.println(json1);
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json1);
@@ -309,5 +309,11 @@ public class MockController {
         Call call = PostMan.getInstance().newCall(request);
         Response response = call.execute();
         return response.body().string();
+    }
+    @RequestMapping("getFile")
+    @ResponseBody
+    public Object getFile(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+        String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+        return JSON.parseObject(fileString);
     }
 }
