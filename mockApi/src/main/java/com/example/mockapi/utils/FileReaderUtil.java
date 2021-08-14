@@ -15,6 +15,7 @@ public class FileReaderUtil {
     /**
      * 向指定微服务配置文件请求文件内容
      *
+     * @param mockUrl 请求url
      * @param mock    实体类包含了租户id/微服务命名空间
      * @param msCode  微服务编码
      * @param version 配置文件版本

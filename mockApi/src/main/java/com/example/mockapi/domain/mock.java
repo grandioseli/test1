@@ -15,7 +15,7 @@ import lombok.Data;
  * invokePosition ?
  * timeout 超时时间
  * key 用作打桩key，mdd模式是由传入的参数拼接而成，其他模式则是直接获取
- * mode 桩的模式
+ * mode 打桩模式
  */
 @Data
 public class Mock {
@@ -32,10 +32,10 @@ public class Mock {
     private String key;
     private String mode;
 
-    public void setKeyBymode() {
+    public void setKeyByMode() {
         switch (this.mode) {
             case "mdd":
-                if (action != null) {
+                if (action != null && action.equals("cancel")) {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
                 } else {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId;

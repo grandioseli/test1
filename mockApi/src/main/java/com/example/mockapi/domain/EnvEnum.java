@@ -40,6 +40,12 @@ public enum EnvEnum {
         this.display_name = display_name;
     }
 
+    /**
+     * 根据环境名称获取对应id
+     *
+     * @param name 环境名称
+     * @return
+     */
     public static Integer getIdByName(String name) {
         for (EnvEnum envenum : values()) {
             if (envenum.getName().equals(name)) {
@@ -55,5 +61,13 @@ public enum EnvEnum {
 
     public int getId() {
         return id;
+    }
+
+    public int getDataCenterId() {
+        return dataCenterId;
+    }
+
+    public String getDisplay_name() {
+        return display_name;
     }
 }

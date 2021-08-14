@@ -56,7 +56,6 @@ public class MockController {
         }
         //如果顶级目标中没有数据,需要重新创建json对象
         if (fileJSON == null) {
-            System.out.println("文件为空，正在创建顶层节点");
             fileJSON = new JSONObject();
             String ytsMock = "yts.mock";
             JSONObject obj = new JSONObject();
@@ -64,13 +63,12 @@ public class MockController {
         }
         //如果有json数据但是顶层没有yts.mock节点，则添加yts.mock节点
         else if (!fileJSON.containsKey("yts.mock")) {
-            System.out.println("顶层节点没有yts.mock");
             String ytsMock = "yts.mock";
             JSONObject obj = new JSONObject();
             fileJSON.put(ytsMock, obj);
         }
         JSONObject mockException = fileJSON.getJSONObject("yts.mock");
-        //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:打桩数据，仍然是一个json对象），将它的keyset提取出来并遍历
+        //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:mockException，仍然是一个json对象），将它的keyset提取出来并遍历
         //由于key可能是拼接而成的，因此不对外层的json做转化，只对内层的value做转化，将key进行手赋值
         Iterator<String> its = mockException.keySet().iterator();
         List<Mock> list = new ArrayList<>();
@@ -111,7 +109,6 @@ public class MockController {
         }
         //如果顶级目标中没有数据,需要重新创建json对象
         if (fileJSON == null) {
-            System.out.println("文件为空，正在创建顶层节点");
             fileJSON = new JSONObject();
             String ytsMock = "yts.mock";
             JSONObject obj = new JSONObject();
@@ -119,7 +116,6 @@ public class MockController {
         }
         //如果有json数据但是顶层没有yts.mock节点，则添加yts.mock节点
         else if (!fileJSON.containsKey("yts.mock")) {
-            System.out.println("顶层节点没有yts.mock");
             String ytsMock = "yts.mock";
             JSONObject obj = new JSONObject();
             fileJSON.put(ytsMock, obj);
@@ -127,7 +123,7 @@ public class MockController {
         String mockKey = "";
         //下面向yts.mock节点增加数据
         //根据模式设定key并获取
-        mock.setKeyBymode();
+        mock.setKeyByMode();
         mockKey = mock.getKey();
         //value也是JSONObject对象，读取由前端传入的各个值
         JSONObject mockException = new JSONObject();
