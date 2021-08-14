@@ -245,9 +245,9 @@ public class MockController {
      * @return
      * @throws IOException
      */
-    @RequestMapping("clearMock")
+    @RequestMapping("clearFile")
     @ResponseBody
-    public Object clearMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object clearFile(Mock mock, String msCode, String version, String envId, String file) throws IOException {
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
         //微服务编码
@@ -260,6 +260,48 @@ public class MockController {
         Integer ienv = EnvEnum.getIdByName(envId);
         contentListObj.put("envId", ienv);
         contentListObj.put("content", "");
+        contentListObj.put("fileKey", file);
+        contentListArr.add(contentListObj);
+        requestJson.put("contentList", contentListArr);
+        String requestString = requestJson.toJSONString();
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
+                .post(body)
+                .build();
+        Call call = PostMan.getInstance().newCall(request);
+        Response response = call.execute();
+        return response.body().string();
+    }
+    @RequestMapping("clearMock")
+    @ResponseBody
+    public Object clearMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+        //首先获取文件内容（JSONObject对象）
+        String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+        JSONObject fileJSON;
+        try {
+            fileJSON = JSON.parseObject(fileString);
+        } catch (JSONException i) {
+            return "删除失败：配置文件中的数据不是json格式！";
+        }
+        if (fileJSON == null) {
+            return "删除失败：配置文件中没有数据";
+        }
+        if (!fileJSON.containsKey("yts.mock")) {
+            return "删除失败：json数据中未找到yts.mock";
+        }
+        fileJSON.put("yts.mock",new JSONObject());
+        //下面组装请求的json
+        JSONObject requestJson = new JSONObject();
+        //微服务编码
+        requestJson.put("serviceCode", msCode);
+        //租户id
+        requestJson.put("providerId", mock.getTenantId());
+        JSONArray contentListArr = new JSONArray();
+        JSONObject contentListObj = new JSONObject();
+        contentListObj.put("version", version);
+        Integer ienv = EnvEnum.getIdByName(envId);
+        contentListObj.put("envId", ienv);
+        contentListObj.put("content", fileJSON.toJSONString());
         contentListObj.put("fileKey", file);
         contentListArr.add(contentListObj);
         requestJson.put("contentList", contentListArr);
