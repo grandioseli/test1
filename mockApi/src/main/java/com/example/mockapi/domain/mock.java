@@ -32,15 +32,12 @@ public class Mock {
     private String key;
     private String mode;
 
-
     public void setKeyBymode() {
         switch (this.mode) {
             case "mdd":
-                if(action !=null) {
+                if (action != null) {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
-                }
-                else
-                {
+                } else {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId;
                 }
                 break;
@@ -55,15 +52,13 @@ public class Mock {
         switch (this.mode) {
             case "mdd": {
                 String[] strARR = key.split("_");
-                if(strARR.length==5) {
+                if (strARR.length == 5) {
                     this.tenantId = strARR[0];
                     this.documentType = strARR[1];
                     this.act = strARR[2];
                     this.ruleId = strARR[3];
                     this.action = strARR[4];
-                }
-                else
-                {
+                } else {
                     this.tenantId = strARR[0];
                     this.documentType = strARR[1];
                     this.act = strARR[2];

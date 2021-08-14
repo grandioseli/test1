@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.example.mockapi.domain.Mock;
+import com.example.mockapi.domain.EnvEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yonyou.cloud.middleware.PostMan;
 import okhttp3.Call;
@@ -23,26 +24,30 @@ import static com.example.mockapi.utils.FileReaderUtil.readFile;
 @Controller
 @RequestMapping("/yts/")
 public class MockController {
-    @Value("${yts.http.provider.url}")
-    private String mockUrl;
+    //查询接口
+    @Value("${yts.http.query.url}")
+    private String queryUrl;
+    //更新接口
+    @Value("${yts.http.update.url}")
+    private String updateUrl;
+
     /**
      * 向指定配置文件请求打桩信息
      *
-     * @param mock 实体类，主要需要的是其中的tenantId
-     * @param msCode 微服务编码
+     * @param mock    实体类，主要需要的是其中的tenantId
+     * @param msCode  微服务编码
      * @param version 配置文件版本
-     * @param envId 环境id
-     * @param file 配置文件名称
-     * @return 返回实体类list即[mock,mock,……]
+     * @param envId   环境id
+     * @param file    配置文件名称
+     * @return 返回实体类list即[mock, mock,……]
      * @throws IOException
      */
     @RequestMapping("getMock")
     @ResponseBody
-    public Object getMock(Mock mock,String msCode, String version,String envId,String file) throws IOException {
+    public Object getMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
         //根据参数获取文件内容(JSONObject)
         ObjectMapper mapper = new ObjectMapper();
-        String url = mockUrl;
-        String fileString = (String) readFile(url,mock,msCode,version,envId,file);
+        String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
         JSONObject fileJSON;
         try {
             fileJSON = JSON.parseObject(fileString);
@@ -72,7 +77,6 @@ public class MockController {
         while (its.hasNext()) {
             //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
             String key = its.next();
-            Mock mockobj;
             JSONObject temp = mockException.getJSONObject(key);
             String temp1 = temp.toJSONString();
             mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
@@ -85,19 +89,20 @@ public class MockController {
 
     /**
      * 向指定配置文件中写入数据
-     * @param mock 实体类用于承接桩信息
-     * @param msCode 微服务编码
+     *
+     * @param mock    实体类用于承接桩信息
+     * @param msCode  微服务编码
      * @param version 配置文件版本
-     * @param envId 环境id
-     * @param file 配置文件名称
+     * @param envId   环境id
+     * @param file    配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("addMock")
     @ResponseBody
-    public Object addMock(Mock mock,String msCode,String version,String envId,String file) throws IOException {
+    public Object addMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
         //首先获取文件内容（JSONObject对象）
-        String fileString = (String) readFile(mockUrl,mock,msCode,version,envId,file);
+        String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
         JSONObject fileJSON;
         try {
             fileJSON = JSON.parseObject(fileString);
@@ -120,6 +125,7 @@ public class MockController {
             fileJSON.put(ytsMock, obj);
         }
         String mockKey = "";
+        //下面向yts.mock节点增加数据
         //根据模式设定key并获取
         mock.setKeyBymode();
         mockKey = mock.getKey();
@@ -151,20 +157,21 @@ public class MockController {
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
         //微服务编码
-        requestJson.put("serviceCode",msCode);
+        requestJson.put("serviceCode", msCode);
         //租户id
-        requestJson.put("providerId",mock.getTenantId());
+        requestJson.put("providerId", mock.getTenantId());
         JSONArray contentListArr = new JSONArray();
         JSONObject contentListObj = new JSONObject();
-        contentListObj.put("version",version);
-        contentListObj.put("envId",1);
-        contentListObj.put("content",fileString);
-        contentListObj.put("fileKey",file);
+        contentListObj.put("version", version);
+        Integer ienv = EnvEnum.getIdByName(envId);
+        contentListObj.put("envId", ienv);
+        contentListObj.put("content", fileString);
+        contentListObj.put("fileKey", file);
         contentListArr.add(contentListObj);
-        requestJson.put("contentList",contentListArr);
+        requestJson.put("contentList", contentListArr);
         String requestString = requestJson.toJSONString();
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -175,19 +182,19 @@ public class MockController {
     /**
      * 根据key删除指定的打桩数据
      *
-     * @param mock 实体类，需要的是里面的tenantId和key
-     * @param msCode 微服务编码
+     * @param mock    实体类，需要的是里面的tenantId和key
+     * @param msCode  微服务编码
      * @param version 配置文件版本
-     * @param envId 环境id
-     * @param file 配置文件名称
+     * @param envId   环境id
+     * @param file    配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("removeMock")
     @ResponseBody
-    public Object removeMock(Mock mock,String msCode,String version,String envId,String file) throws IOException {
+    public Object removeMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
         //首先获取文件内容（JSONObject对象）
-        String fileString = (String) readFile(mockUrl,mock,msCode,version,envId,file);
+        String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
         JSONObject fileJSON;
         try {
             fileJSON = JSON.parseObject(fileString);
@@ -209,20 +216,21 @@ public class MockController {
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
         //微服务编码
-        requestJson.put("serviceCode",msCode);
+        requestJson.put("serviceCode", msCode);
         //租户id
-        requestJson.put("providerId",mock.getTenantId());
+        requestJson.put("providerId", mock.getTenantId());
         JSONArray contentListArr = new JSONArray();
         JSONObject contentListObj = new JSONObject();
-        contentListObj.put("version",version);
-        contentListObj.put("envId",1);
-        contentListObj.put("content",fileString);
-        contentListObj.put("fileKey",file);
+        contentListObj.put("version", version);
+        Integer ienv = EnvEnum.getIdByName(envId);
+        contentListObj.put("envId", ienv);
+        contentListObj.put("content", fileString);
+        contentListObj.put("fileKey", file);
         contentListArr.add(contentListObj);
-        requestJson.put("contentList",contentListArr);
+        requestJson.put("contentList", contentListArr);
         String requestString = requestJson.toJSONString();
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -233,34 +241,35 @@ public class MockController {
     /**
      * 清空配置文件内容
      *
-     * @param mock 实体类，需要的是里面的租户id
+     * @param mock    实体类，需要的是里面的租户id
      * @param msCode  微服务编码
-     * @param version  配置文件版本
-     * @param envId  环境id
-     * @param file  配置文件名称
+     * @param version 配置文件版本
+     * @param envId   环境id
+     * @param file    配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("clearMock")
     @ResponseBody
-    public Object clearMock(Mock mock,String msCode,String version,String envId,String file) throws IOException {
+    public Object clearMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
         //微服务编码
-        requestJson.put("serviceCode",msCode);
+        requestJson.put("serviceCode", msCode);
         //租户id
-        requestJson.put("providerId",mock.getTenantId());
+        requestJson.put("providerId", mock.getTenantId());
         JSONArray contentListArr = new JSONArray();
         JSONObject contentListObj = new JSONObject();
-        contentListObj.put("version",version);
-        contentListObj.put("envId",1);
-        contentListObj.put("content","");
-        contentListObj.put("fileKey",file);
+        contentListObj.put("version", version);
+        Integer ienv = EnvEnum.getIdByName(envId);
+        contentListObj.put("envId", ienv);
+        contentListObj.put("content", "");
+        contentListObj.put("fileKey", file);
         contentListArr.add(contentListObj);
-        requestJson.put("contentList",contentListArr);
+        requestJson.put("contentList", contentListArr);
         String requestString = requestJson.toJSONString();
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -277,7 +286,7 @@ public class MockController {
     @RequestMapping("addAnything")
     @ResponseBody
     public Object addAnything() throws IOException {
-                String json = "{\n" +
+        String json = "{\n" +
                 "    \"serviceCode\":\"rpc-provider-531\",\n" +
                 "    \"providerId\": \"c87e2267-1001-4c70-bb2a-ab41f3b81aa3\",\n" +
                 "    \"contentList\":[\n" +
@@ -290,15 +299,15 @@ public class MockController {
                 "    ]\n" +
                 "}";
         JSONObject kk = new JSONObject();
-        kk.put("123",123);
+        kk.put("123", 123);
         String kkk = kk.toJSONString();
         JSONObject temp = JSON.parseObject(json);
-        JSONArray temp1 =temp.getJSONArray("contentList");
-        temp1.getJSONObject(0).put("content",kkk);
+        JSONArray temp1 = temp.getJSONArray("contentList");
+        temp1.getJSONObject(0).put("content", 123);
         String json1 = temp.toJSONString();
         System.out.println(json1);
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json1);
-        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", "http://dc1.yms.app.yyuap.com//confcenter/api/v1/microservice/update")
+        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);

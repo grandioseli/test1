@@ -1,6 +1,5 @@
 package com.example.mockapi.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.example.mockapi.domain.Mock;
 import com.yonyou.cloud.middleware.PostMan;
 import okhttp3.Call;
@@ -16,18 +15,16 @@ public class FileReaderUtil {
     /**
      * 向指定微服务配置文件请求文件内容
      *
-     * @param mock 实体类包含了租户id/微服务命名空间
-     * @param msCode 微服务编码
+     * @param mock    实体类包含了租户id/微服务命名空间
+     * @param msCode  微服务编码
      * @param version 配置文件版本
-     * @param envId 环境编码
-     * @param file 文件名称，分布式事务可指定mwclient.json
+     * @param envId   环境编码
+     * @param file    文件名称，分布式事务可指定mwclient.json
      * @return 返回JSON字符串
      * @throws IOException
      */
     public static Object readFile(String mockUrl, Mock mock, String msCode, String version, String envId, String file) throws IOException {
-        String url = mockUrl + "?groupid="+mock.getTenantId()+"&app="+msCode+"&version="+version+"&env="+envId+"&key="+file;
-//        "http://dc1.yms.app.yyuap.com/co" +
-//                "nfcenter/api/config/file?groupid=c87e2267-1001-4c70-bb2a-ab41f3b81aa3&app=rpc-provider-531&version=1.0.0&env=dev&key=mwclient.json"
+        String url = mockUrl + "?groupid=" + mock.getTenantId() + "&app=" + msCode + "&version=" + version + "&env=" + envId + "&key=" + file;
         Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", url)
                 .get()
                 .build();
