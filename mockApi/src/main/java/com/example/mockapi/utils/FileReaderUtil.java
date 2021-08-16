@@ -34,6 +34,15 @@ public class FileReaderUtil {
         return response.body().string();
     }
 
+    /**
+     * 检查参数完整性
+     * @param mock 桩信息
+     * @param msCode 微服务编码
+     * @param version 配置文件版本
+     * @param envId 环境编码
+     * @param file 配置文件名
+     * @return
+     */
     public static String getCheckValid(Mock mock, String msCode, String version, String envId, String file) {
         if (mock.getTenantId() == null || msCode == null || version == null || envId == null || file == null) {
             return "参数不能为空";
