@@ -272,6 +272,18 @@ public class MockController {
         Response response = call.execute();
         return response.body().string();
     }
+
+    /**
+     * 仅删除mock内容
+     *
+     * @param mock    实体类，需要的是传入的租户id
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param envId   环境id
+     * @param file    配置文件名称
+     * @return
+     * @throws IOException
+     */
     @RequestMapping("clearMock")
     @ResponseBody
     public Object clearMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
@@ -289,7 +301,7 @@ public class MockController {
         if (!fileJSON.containsKey("yts.mock")) {
             return "删除失败：json数据中未找到yts.mock";
         }
-        fileJSON.put("yts.mock",new JSONObject());
+        fileJSON.put("yts.mock", new JSONObject());
         //下面组装请求的json
         JSONObject requestJson = new JSONObject();
         //微服务编码
@@ -352,6 +364,18 @@ public class MockController {
         Response response = call.execute();
         return response.body().string();
     }
+
+    /**
+     * 读取文件内容
+     *
+     * @param mock    实体类，需要的是里面的租户id
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param envId   环境id
+     * @param file    配置文件名称
+     * @return
+     * @throws IOException
+     */
     @RequestMapping("getFile")
     @ResponseBody
     public Object getFile(Mock mock, String msCode, String version, String envId, String file) throws IOException {
