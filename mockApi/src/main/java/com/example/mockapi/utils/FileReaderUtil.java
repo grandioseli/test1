@@ -33,4 +33,40 @@ public class FileReaderUtil {
         Response response = call.execute();
         return response.body().string();
     }
+
+    public static String getCheckValid(Mock mock, String msCode, String version, String envId, String file) {
+        if (mock.getTenantId() == null || msCode == null || version == null || envId == null || file == null) {
+            return "参数不能为空";
+        }
+        return "success";
+    }
+
+    public static String addCheckValid(Mock mock, String msCode, String version, String envId, String file) {
+        if (mock.getTenantId() == null || mock.getMode() == null || msCode == null || envId == null || version == null || file == null) {
+            return "参数不能为空";
+        }
+        if (mock.getMode().equals("mdd")) {
+            if (mock.getRuleId() == null || mock.getAct() == null || mock.getDocumentType() == null) {
+                return "mdd模式，key的参数不足";
+            }
+        }
+        if (mock.getMode().equals("http")) {
+            if (mock.getKey() == null) {
+                return "http模式，key不能为空";
+            }
+        }
+        if (mock.getMode().equals("iris")) {
+            if (mock.getKey() == null) {
+                return "iris模式，key不能为空";
+            }
+        }
+        return "success";
+    }
+
+    public static String removeCheckValid(Mock mock, String msCode, String version, String envId, String file) {
+        if (mock.getTenantId() == null || mock.getKey() == null || msCode == null || version == null || envId == null || file == null) {
+            return "参数不能为空";
+        }
+        return "success";
+    }
 }
