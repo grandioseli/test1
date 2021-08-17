@@ -34,21 +34,26 @@ public class MockController {
     /**
      * 向指定配置文件请求打桩信息
      *
-     * @param mock    实体类，主要需要的是其中的tenantId
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
-     * @return 返回实体类list即[mock, mock,……]
+     * @param providerId 租户id/微服务命名空间
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
+     * @return 返回实体类list即[Mock, Mock,……]
      * @throws IOException
      */
     @RequestMapping("getMock")
     @ResponseBody
-    public Object getMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object getMock(String providerId, String msCode, String version, String env, String file) throws IOException {
         //根据参数获取文件内容(JSONObject)
-        if (getCheckValid(mock, msCode, version, envId, file).equals("success")) {
+        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
             ObjectMapper mapper = new ObjectMapper();
-            String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+            String fileString;
+            try {
+                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
+            } catch (NullPointerException e) {
+                return "获取失败：无效的租户id";
+            }
             JSONObject fileJSON;
             try {
                 fileJSON = JSON.parseObject(fileString);
@@ -61,6 +66,10 @@ public class MockController {
                 String ytsMock = "yts.mock";
                 JSONObject obj = new JSONObject();
                 fileJSON.put(ytsMock, obj);
+            }
+            //防止权限错误
+            else if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
+                return "获取失败:该配置文件不是公开配置文件，不能被其他租户读取";
             }
             //如果有json数据但是顶层没有yts.mock节点，则添加yts.mock节点
             else if (!fileJSON.containsKey("yts.mock")) {
@@ -75,6 +84,7 @@ public class MockController {
             List<Mock> list = new ArrayList<>();
             while (its.hasNext()) {
                 //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
+                Mock mock;
                 String key = its.next();
                 JSONObject temp = mockException.getJSONObject(key);
                 String temp1 = temp.toJSONString();
@@ -85,32 +95,38 @@ public class MockController {
             }
             return list;
         } else {
-            return getCheckValid(mock, msCode, version, envId, file);
+            return getCheckValid(providerId, msCode, version, env, file);
         }
     }
 
     /**
      * 向指定配置文件中写入数据
      *
-     * @param mock    实体类用于承接桩信息
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
+     * @param mock       实体类用于承接桩信息
+     * @param providerId 租户id
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
      * @return 返回添加信息
      * @throws IOException
      */
     @RequestMapping("addMock")
     @ResponseBody
-    public Object addMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object addMock(Mock mock, String providerId, String msCode, String version, String env, String file) throws IOException {
         //首先获取文件内容（JSONObject对象）
-        if (addCheckValid(mock, msCode, version, envId, file).equals("success")) {
-            String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+        if (addCheckValid(mock, providerId, msCode, version, env, file).equals("success")) {
+            String fileString;
+            try {
+                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
+            } catch (NullPointerException e) {
+                return "写入失败：无效的租户id";
+            }
             JSONObject fileJSON;
             try {
                 fileJSON = JSON.parseObject(fileString);
             } catch (JSONException i) {
-                return "添加失败：配置文件中的数据不是json格式！";
+                return "写入失败：配置文件中的数据不是json格式！";
             }
             //如果顶级目标中没有数据,需要重新创建json对象
             if (fileJSON == null) {
@@ -118,6 +134,8 @@ public class MockController {
                 String ytsMock = "yts.mock";
                 JSONObject obj = new JSONObject();
                 fileJSON.put(ytsMock, obj);
+            } else if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
+                return "写入失败:该配置文件不是公开配置文件，不能被其他租户读取";
             }
             //如果有json数据但是顶层没有yts.mock节点，则添加yts.mock节点
             else if (!fileJSON.containsKey("yts.mock")) {
@@ -160,51 +178,46 @@ public class MockController {
             //微服务编码
             requestJson.put("serviceCode", msCode);
             //租户id
-            requestJson.put("providerId", mock.getTenantId());
+            requestJson.put("providerId", providerId);
             JSONArray contentListArr = new JSONArray();
             JSONObject contentListObj = new JSONObject();
             contentListObj.put("version", version);
-            Integer ienv = EnvEnum.getIdByName(envId);
+            Integer ienv = EnvEnum.getIdByName(env);
             contentListObj.put("envId", ienv);
             contentListObj.put("content", fileString);
             contentListObj.put("fileKey", file);
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-            Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
-                    .post(body)
-                    .build();
-            Call call = PostMan.getInstance().newCall(request);
-            Response response = call.execute();
-//        JSONObject responseBody = JSON.parseObject(response.body().string());
-//        String result=(responseBody.get("success").equals("true"))?"成功":"失败";
-//        String msg = (responseBody.get("error_message")==null)?"无错误":responseBody.get("error_message").toString();
-//        return "添加"+result+"!"+"返回的错误信息："+msg;
-            assert response.body() != null;
-            return response.body().string();
+            return postFile(requestString, updateUrl, providerId);
         } else {
-            return addCheckValid(mock, msCode, version, envId, file);
+            return addCheckValid(mock, providerId, msCode, version, env, file);
         }
     }
 
     /**
      * 根据key删除指定的打桩数据
      *
-     * @param mock    实体类，需要的是里面的tenantId和key
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
+     * @param mock       实体类，需要的是里面的tenantId和key
+     * @param providerId 租户id
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("removeMock")
     @ResponseBody
-    public Object removeMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object removeMock(Mock mock, String providerId, String msCode, String version, String env, String file) throws IOException {
         //首先获取文件内容（JSONObject对象）
-        if (removeCheckValid(mock, msCode, version, envId, file).equals("success")) {
-            String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+        if (removeCheckValid(mock, providerId, msCode, version, env, file).equals("success")) {
+            String fileString;
+            try {
+                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
+            } catch (NullPointerException e) {
+                return "删除失败：无效的租户id";
+            }
             JSONObject fileJSON;
             try {
                 fileJSON = JSON.parseObject(fileString);
@@ -213,6 +226,8 @@ public class MockController {
             }
             if (fileJSON == null) {
                 return "删除失败：配置文件中没有数据";
+            } else if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
+                return "删除失败:该配置文件不是公开配置文件，不能被其他租户读取";
             }
             if (!fileJSON.containsKey("yts.mock")) {
                 return "删除失败：json数据中未找到yts.mock";
@@ -228,99 +243,88 @@ public class MockController {
             //微服务编码
             requestJson.put("serviceCode", msCode);
             //租户id
-            requestJson.put("providerId", mock.getTenantId());
+            requestJson.put("providerId", providerId);
             JSONArray contentListArr = new JSONArray();
             JSONObject contentListObj = new JSONObject();
             contentListObj.put("version", version);
-            Integer ienv = EnvEnum.getIdByName(envId);
+            Integer ienv = EnvEnum.getIdByName(env);
             contentListObj.put("envId", ienv);
             contentListObj.put("content", fileString);
             contentListObj.put("fileKey", file);
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-            Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
-                    .post(body)
-                    .build();
-            Call call = PostMan.getInstance().newCall(request);
-            Response response = call.execute();
-//        JSONObject responseBody = JSON.parseObject(response.body().string());
-//        String result=(responseBody.get("success").equals("true"))?"成功":"失败";
-//        String msg = (responseBody.get("error_message")==null)?"无错误":responseBody.get("error_message").toString();
-//        return "删除"+result+"!"+"返回的错误信息："+msg;
-            assert response.body() != null;
-            return response.body().string();
+            return postFile(requestString, updateUrl, providerId);
         } else {
-            return removeCheckValid(mock, msCode, version, envId, file);
+            return removeCheckValid(mock, providerId, msCode, version, env, file);
         }
     }
 
     /**
      * 清空配置文件内容
      *
-     * @param mock    实体类，需要的是里面的租户id
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
+     * @param providerId 租户id
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("clearFile")
     @ResponseBody
-    public Object clearFile(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object clearFile(String providerId, String msCode, String version, String env, String file) throws IOException {
         //下面组装请求的json
-        if (getCheckValid(mock, msCode, version, envId, file).equals("success")) {
+        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
             JSONObject requestJson = new JSONObject();
             //微服务编码
             requestJson.put("serviceCode", msCode);
             //租户id
-            requestJson.put("providerId", mock.getTenantId());
+            requestJson.put("providerId", providerId);
             JSONArray contentListArr = new JSONArray();
             JSONObject contentListObj = new JSONObject();
             contentListObj.put("version", version);
-            Integer ienv = EnvEnum.getIdByName(envId);
+            Integer ienv = EnvEnum.getIdByName(env);
             contentListObj.put("envId", ienv);
             contentListObj.put("content", "");
             contentListObj.put("fileKey", file);
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-            Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
-                    .post(body)
-                    .build();
-            Call call = PostMan.getInstance().newCall(request);
-            Response response = call.execute();
-//        JSONObject responseBody = JSON.parseObject(response.body().string());
-//        String result=(responseBody.get("success").equals("true"))?"成功":"失败";
-//        String msg = (responseBody.get("error_message")==null)?"无错误":responseBody.get("error_message").toString();
-//        return "删除"+result+"!"+"返回的错误信息："+msg;
-            assert response.body() != null;
-            return response.body().string();
+            String result;
+            try {
+                result = postFile(requestString, updateUrl, providerId);
+            } catch (NullPointerException e) {
+                return "删除失败，无效的租户id";
+            }
+            return result;
         } else {
-            return getCheckValid(mock, msCode, version, envId, file);
+            return getCheckValid(providerId, msCode, version, env, file);
         }
     }
 
     /**
      * 仅删除mock内容
      *
-     * @param mock    实体类，需要的是传入的租户id
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
+     * @param providerId 租户id
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("clearMock")
     @ResponseBody
-    public Object clearMock(Mock mock, String msCode, String version, String envId, String file) throws IOException {
+    public Object clearMock(String providerId, String msCode, String version, String env, String file) throws IOException {
         //首先获取文件内容（JSONObject对象）
-        if (getCheckValid(mock, msCode, version, envId, file).equals("success")) {
-            String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
+        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+            String fileString;
+            try {
+                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
+            } catch (NullPointerException e) {
+                return "删除失败：无效的租户id";
+            }
             JSONObject fileJSON;
             try {
                 fileJSON = JSON.parseObject(fileString);
@@ -329,6 +333,9 @@ public class MockController {
             }
             if (fileJSON == null) {
                 return "删除失败：配置文件中没有数据";
+            }
+            if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
+                return "删除失败:该配置文件不是公开配置文件，不能被其他租户读取";
             }
             if (!fileJSON.containsKey("yts.mock")) {
                 return "删除失败：json数据中未找到yts.mock";
@@ -339,31 +346,20 @@ public class MockController {
             //微服务编码
             requestJson.put("serviceCode", msCode);
             //租户id
-            requestJson.put("providerId", mock.getTenantId());
+            requestJson.put("providerId", providerId);
             JSONArray contentListArr = new JSONArray();
             JSONObject contentListObj = new JSONObject();
             contentListObj.put("version", version);
-            Integer ienv = EnvEnum.getIdByName(envId);
+            Integer ienv = EnvEnum.getIdByName(env);
             contentListObj.put("envId", ienv);
             contentListObj.put("content", fileJSON.toJSONString());
             contentListObj.put("fileKey", file);
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), requestString);
-            Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
-                    .post(body)
-                    .build();
-            Call call = PostMan.getInstance().newCall(request);
-            Response response = call.execute();
-//        JSONObject responseBody = JSON.parseObject(response.body().string());
-//        String result=(responseBody.get("success").equals("true"))?"成功":"失败";
-//        String msg = (responseBody.get("error_message")==null)?"无错误":responseBody.get("error_message").toString();
-//        return "删除"+result+"!"+"返回的错误信息："+msg;
-            assert response.body() != null;
-            return response.body().string();
+            return postFile(requestString, updateUrl, providerId);
         } else {
-            return getCheckValid(mock, msCode, version, envId, file);
+            return getCheckValid(providerId, msCode, version, env, file);
         }
     }
 
@@ -395,9 +391,8 @@ public class MockController {
         JSONArray temp1 = temp.getJSONArray("contentList");
         temp1.getJSONObject(0).put("content", kkk);
         String json1 = temp.toJSONString();
-        System.out.println(json1);
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json1);
-        Request request = PostMan.getAuthedBuilder("tOkAcZqKXiwcrZwM", "s0DB2JrXWQwNn46nZetteqcxMr6WOr", updateUrl)
+        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", updateUrl)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -409,23 +404,27 @@ public class MockController {
     /**
      * 读取文件内容
      *
-     * @param mock    实体类，需要的是里面的租户id
-     * @param msCode  微服务编码
-     * @param version 配置文件版本
-     * @param envId   环境id
-     * @param file    配置文件名称
+     * @param providerId 实体类，需要的是里面的租户id
+     * @param msCode     微服务编码
+     * @param version    配置文件版本
+     * @param env        环境名称
+     * @param file       配置文件名称
      * @return
      * @throws IOException
      */
     @RequestMapping("getFile")
     @ResponseBody
-    public Object getFile(Mock mock, String msCode, String version, String envId, String file) throws IOException {
-        if (getCheckValid(mock, msCode, version, envId, file).equals("success")) {
-            String fileString = (String) readFile(queryUrl, mock, msCode, version, envId, file);
-//        return fileString;
-            return JSON.parseObject(fileString);
+    public Object getFile(String providerId, String msCode, String version, String env, String file) throws IOException {
+        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+            String fileString;
+            try {
+                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
+            } catch (NullPointerException e) {
+                return "获取失败：无效的租户id";
+            }
+            return fileString;
         } else {
-            return getCheckValid(mock, msCode, version, envId, file);
+            return getCheckValid(providerId, msCode, version, env, file);
         }
     }
 }
