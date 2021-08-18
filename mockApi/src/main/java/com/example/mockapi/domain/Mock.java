@@ -4,6 +4,8 @@ import lombok.Data;
 
 
 /**
+ * 基础桩
+ *
  * groupId 租户id
  * documentType 单据类型
  * act 动作

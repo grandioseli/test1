@@ -198,7 +198,7 @@ public class MockController {
     /**
      * 根据key删除指定的打桩数据
      *
-     * @param mock       实体类，需要的是里面的tenantId和key
+     * @param mock       实体类，需要的是里面的key
      * @param providerId 租户id
      * @param msCode     微服务编码
      * @param version    配置文件版本
@@ -226,7 +226,8 @@ public class MockController {
             }
             if (fileJSON == null) {
                 return "删除失败：配置文件中没有数据";
-            } else if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
+            }
+            if (fileJSON.containsKey("error_message") && fileJSON.get("error_message").equals("该配置文件不是公开配置文件，不能被其他租户读取")) {
                 return "删除失败:该配置文件不是公开配置文件，不能被其他租户读取";
             }
             if (!fileJSON.containsKey("yts.mock")) {
