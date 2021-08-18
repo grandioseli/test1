@@ -1,5 +1,8 @@
-package com.example.mockapi.domain;
+package com.example.mockapi.domain.ienum;
 
+/**
+ * providerId枚举
+ */
 public enum AuthEnum {
     auth1("c87e2267-1001-4c70-bb2a-ab41f3b81aa3", "TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh");
 

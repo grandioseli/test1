@@ -1,5 +1,8 @@
-package com.example.mockapi.domain;
+package com.example.mockapi.domain.ienum;
 
+/**
+ * 环境枚举
+ */
 public enum EnvEnum {
     env1(1, 1, "dev", "开发环境"),
     env2(2, 1, "test", "测试环境"),

@@ -4,14 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.example.mockapi.domain.Mock;
-import com.example.mockapi.domain.EnvEnum;
+import com.example.mockapi.domain.mock.*;
+import com.example.mockapi.domain.ienum.EnvEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yonyou.cloud.middleware.PostMan;
-import okhttp3.Call;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +34,7 @@ public class MockController {
      * @param version    配置文件版本
      * @param env        环境名称
      * @param file       配置文件名称
-     * @return 返回实体类list即[Mock, Mock,……]
-     * @throws IOException
+     * @return 返回实体类list即[BaseMock, BaseMock,……]
      */
     @RequestMapping("getMock")
     @ResponseBody
@@ -77,21 +71,51 @@ public class MockController {
                 JSONObject obj = new JSONObject();
                 fileJSON.put(ytsMock, obj);
             }
-            JSONObject mockException = fileJSON.getJSONObject("yts.mock");
+            JSONObject ytsMock = fileJSON.getJSONObject("yts.mock");
             //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:mockException，仍然是一个json对象），将它的keyset提取出来并遍历
             //由于key可能是拼接而成的，因此不对外层的json做转化，只对内层的value做转化，将key进行手赋值
-            Iterator<String> its = mockException.keySet().iterator();
-            List<Mock> list = new ArrayList<>();
+            Iterator<String> its = ytsMock.keySet().iterator();
+            List<BaseMock> list = new ArrayList<>();
             while (its.hasNext()) {
                 //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
-                Mock mock;
                 String key = its.next();
-                JSONObject temp = mockException.getJSONObject(key);
-                String temp1 = temp.toJSONString();
-                mock = mapper.readValue(temp1, Mock.class);//Json对象转为实体对象
-                mock.setKey(key);
-                mock.splitKey();
-                list.add(mock);
+                JSONObject mockException = ytsMock.getJSONObject(key);
+                JSONObject basicData = ytsMock.getJSONObject(key).getJSONObject("basicData");
+                String sbasicData = basicData.toJSONString();
+                if (mockException.get("mode").equals("mdd")) {
+                    MddMock mock;
+                    mock = mapper.readValue(sbasicData, MddMock.class);//Json对象转为实体对象
+                    mock.setType(mockException.getString("type"));
+                    mock.setMode(mockException.getString("mode"));
+                    mock.setMsg(mockException.getString("msg"));
+                    mock.setPosition(mockException.getString("position"));
+                    mock.setInvokePosition(mockException.getString("invokePosition"));
+                    mock.setTimeout(mockException.getInteger("timeout"));
+                    mock.setKey(key);
+                    list.add(mock);
+                } else if (mockException.get("mode").equals("iris")) {
+                    IrisMock mock;
+                    mock = mapper.readValue(sbasicData, IrisMock.class);//Json对象转为实体对象
+                    mock.setType(mockException.getString("type"));
+                    mock.setMode(mockException.getString("mode"));
+                    mock.setMsg(mockException.getString("msg"));
+                    mock.setPosition(mockException.getString("position"));
+                    mock.setInvokePosition(mockException.getString("invokePosition"));
+                    mock.setTimeout(mockException.getInteger("timeout"));
+                    mock.setKey(key);
+                    list.add(mock);
+                } else if (mockException.get("mode").equals("http")) {
+                    HttpMock mock;
+                    mock = mapper.readValue(sbasicData, HttpMock.class);//Json对象转为实体对象
+                    mock.setType(mockException.getString("type"));
+                    mock.setMode(mockException.getString("mode"));
+                    mock.setMsg(mockException.getString("msg"));
+                    mock.setPosition(mockException.getString("position"));
+                    mock.setInvokePosition(mockException.getString("invokePosition"));
+                    mock.setTimeout(mockException.getInteger("timeout"));
+                    mock.setKey(key);
+                    list.add(mock);
+                }
             }
             return list;
         } else {
@@ -109,7 +133,6 @@ public class MockController {
      * @param env        环境名称
      * @param file       配置文件名称
      * @return 返回添加信息
-     * @throws IOException
      */
     @RequestMapping("addMock")
     @ResponseBody
@@ -167,6 +190,36 @@ public class MockController {
             }
             if (mock.getMode() != null) {
                 mockException.put("mode", mock.getMode());
+            }
+            //如果是mdd模式
+            assert mock.getMode() != null;
+            switch (mock.getMode()) {
+                case "mdd": {
+                    JSONObject temp = new JSONObject();
+                    temp.put("tenantId", mock.getTenantId());
+                    temp.put("documentType", mock.getDocumentType());
+                    temp.put("act", mock.getAct());
+                    temp.put("ruleId", mock.getRuleId());
+                    temp.put("action", mock.getAction());
+                    mockException.put("basicData", temp);
+                    break;
+                }
+                case "iris": {
+                    JSONObject temp = new JSONObject();
+                    temp.put("packageName", mock.getPackageName());
+                    temp.put("className", mock.getClassName());
+                    temp.put("methodName", mock.getMethodName());
+                    temp.put("paramTypeList", mock.getParamTypeList());
+                    mockException.put("basicData", temp);
+                    break;
+                }
+                case "http": {
+                    JSONObject temp = new JSONObject();
+                    temp.put("action", mock.getAction());
+                    temp.put("httpUrl", mock.getHttpUrl());
+                    mockException.put("basicData", temp);
+                    break;
+                }
             }
             //原先的yts.mock的value
             JSONObject jsonObject = fileJSON.getJSONObject("yts.mock");
@@ -365,44 +418,6 @@ public class MockController {
     }
 
     /**
-     * 该方法用于向配置文件中添加任意形式的数据，测试用，测完删除
-     *
-     * @return
-     * @throws IOException
-     */
-    @RequestMapping("addAnything")
-    @ResponseBody
-    public Object addAnything() throws IOException {
-        String json = "{\n" +
-                "    \"serviceCode\":\"rpc-provider-531\",\n" +
-                "    \"providerId\": \"c87e2267-1001-4c70-bb2a-ab41f3b81aa3\",\n" +
-                "    \"contentList\":[\n" +
-                "        {\n" +
-                "            \"version\":\"1.0.0\",\n" +
-                "            \"envId\": 1,\n" +
-                "            \"content\": \"\",\n" +
-                "            \"fileKey\": \"mwclient.json\"\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
-        JSONObject kk = new JSONObject();
-        kk.put("123", 123);
-        String kkk = kk.toJSONString();
-        JSONObject temp = JSON.parseObject(json);
-        JSONArray temp1 = temp.getJSONArray("contentList");
-        temp1.getJSONObject(0).put("content", kkk);
-        String json1 = temp.toJSONString();
-        okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json1);
-        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", updateUrl)
-                .post(body)
-                .build();
-        Call call = PostMan.getInstance().newCall(request);
-        Response response = call.execute();
-        assert response.body() != null;
-        return response.body().string();
-    }
-
-    /**
      * 读取文件内容
      *
      * @param providerId 实体类，需要的是里面的租户id
@@ -423,7 +438,7 @@ public class MockController {
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
-            return fileString;
+            return JSON.parseObject(fileString);
         } else {
             return getCheckValid(providerId, msCode, version, env, file);
         }

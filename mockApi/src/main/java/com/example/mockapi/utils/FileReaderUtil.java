@@ -1,6 +1,6 @@
 package com.example.mockapi.utils;
 
-import com.example.mockapi.domain.Mock;
+import com.example.mockapi.domain.mock.Mock;
 import com.yonyou.cloud.middleware.PostMan;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -9,8 +9,8 @@ import okhttp3.Response;
 
 import java.io.*;
 
-import static com.example.mockapi.domain.AuthEnum.getAccessKeyByProviderId;
-import static com.example.mockapi.domain.AuthEnum.getAccessSecretByProviderId;
+import static com.example.mockapi.domain.ienum.AuthEnum.getAccessKeyByProviderId;
+import static com.example.mockapi.domain.ienum.AuthEnum.getAccessSecretByProviderId;
 
 /**
  * 对文件的各个操作
@@ -106,12 +106,12 @@ public class FileReaderUtil {
             }
         }
         if (mock.getMode().equals("http")) {
-            if (mock.getKey() == null) {
+            if (mock.getHttpUrl() == null||mock.getAction()==null) {
                 return "http模式，key不能为空";
             }
         }
         if (mock.getMode().equals("iris")) {
-            if (mock.getKey() == null) {
+            if (mock.getMethodName() == null||mock.getParamTypeList()==null||mock.getPackageName()==null||mock.getClassName()==null) {
                 return "iris模式，key不能为空";
             }
         }
