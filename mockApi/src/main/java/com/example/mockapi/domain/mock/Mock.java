@@ -64,12 +64,20 @@ public class Mock {
                 }
                 break;
             case "iris":
-                StringBuilder params = new StringBuilder();
-                for (String param : paramTypeList) {
-                    params.append(param).append(',');
+                if(paramTypeList!=null) {
+                    StringBuilder params = new StringBuilder();
+                    for (String param : paramTypeList) {
+                        params.append(param).append(',');
+                    }
+                    if (params.length() > 0) {
+                        params = new StringBuilder(params.substring(0, params.length() - 1));
+                    }
+                    key = packageName + '.' + className + '.' + methodName + '(' + params + ')';
                 }
-                params = new StringBuilder(params.substring(0, params.length() - 1));
-                key = packageName + '.' + className + '.' + methodName + '(' + params + ')';
+                else
+                {
+                    key = packageName + '.' + className + '.' + methodName+"()";
+                }
                 break;
         }
     }

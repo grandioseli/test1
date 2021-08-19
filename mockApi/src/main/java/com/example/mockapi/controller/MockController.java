@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.*;
 
@@ -29,26 +30,37 @@ public class MockController {
     /**
      * 向指定配置文件请求打桩信息
      *
-     * @param providerId 租户id/微服务命名空间
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param request 用于租户id/微服务命名空间
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      * @return 返回实体类list即[BaseMock, BaseMock,……]
      */
     @RequestMapping("getMock")
     @ResponseBody
-    public Object getMock(String providerId, String msCode, String version, String env, String file) throws IOException {
+    public Object getMock(HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        //从cookie中获取providerId
+        String providerId = getProviderId(request);
         //根据参数获取文件内容(JSONObject)
-        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+        //检查完整性,version和file有默认值
+        if (getCheckValid(providerId, msCode, env).equals("success")) {
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             ObjectMapper mapper = new ObjectMapper();
             String fileString;
+            //尝试读取文件
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
             JSONObject fileJSON;
+            //查看是否是JSON格式
             try {
                 fileJSON = JSON.parseObject(fileString);
             } catch (JSONException i) {
@@ -79,66 +91,83 @@ public class MockController {
             while (its.hasNext()) {
                 //获取到key，并将它赋给mock对象的id，注意这里迭代器已经指向下一个数据了
                 String key = its.next();
+                //读取每个key代表队mockException
                 JSONObject mockException = ytsMock.getJSONObject(key);
+                //读取mockException中的basicData（头部数据）
                 JSONObject basicData = ytsMock.getJSONObject(key).getJSONObject("basicData");
                 String sbasicData = basicData.toJSONString();
-                if (mockException.get("mode").equals("mdd")) {
-                    MddMock mock;
-                    mock = mapper.readValue(sbasicData, MddMock.class);//Json对象转为实体对象
-                    mock.setType(mockException.getString("type"));
-                    mock.setMode(mockException.getString("mode"));
-                    mock.setMsg(mockException.getString("msg"));
-                    mock.setPosition(mockException.getString("position"));
-                    mock.setInvokePosition(mockException.getString("invokePosition"));
-                    mock.setTimeout(mockException.getInteger("timeout"));
-                    mock.setKey(key);
-                    list.add(mock);
-                } else if (mockException.get("mode").equals("iris")) {
-                    IrisMock mock;
-                    mock = mapper.readValue(sbasicData, IrisMock.class);//Json对象转为实体对象
-                    mock.setType(mockException.getString("type"));
-                    mock.setMode(mockException.getString("mode"));
-                    mock.setMsg(mockException.getString("msg"));
-                    mock.setPosition(mockException.getString("position"));
-                    mock.setInvokePosition(mockException.getString("invokePosition"));
-                    mock.setTimeout(mockException.getInteger("timeout"));
-                    mock.setKey(key);
-                    list.add(mock);
-                } else if (mockException.get("mode").equals("http")) {
-                    HttpMock mock;
-                    mock = mapper.readValue(sbasicData, HttpMock.class);//Json对象转为实体对象
-                    mock.setType(mockException.getString("type"));
-                    mock.setMode(mockException.getString("mode"));
-                    mock.setMsg(mockException.getString("msg"));
-                    mock.setPosition(mockException.getString("position"));
-                    mock.setInvokePosition(mockException.getString("invokePosition"));
-                    mock.setTimeout(mockException.getInteger("timeout"));
-                    mock.setKey(key);
-                    list.add(mock);
+                //根据模式的不同选择不同的mock
+                switch (mockException.getString("mode")) {
+                    case "mdd": {
+                        MddMock mock;
+                        mock = mapper.readValue(sbasicData, MddMock.class);//Json对象转为实体对象
+                        mock.setType(mockException.getString("type"));
+                        mock.setMode(mockException.getString("mode"));
+                        mock.setMsg(mockException.getString("msg"));
+                        mock.setPosition(mockException.getString("position"));
+                        mock.setInvokePosition(mockException.getString("invokePosition"));
+                        mock.setTimeout(mockException.getInteger("timeout"));
+                        mock.setKey(key);
+                        list.add(mock);
+                        break;
+                    }
+                    case "iris": {
+                        IrisMock mock;
+                        mock = mapper.readValue(sbasicData, IrisMock.class);//Json对象转为实体对象
+                        mock.setType(mockException.getString("type"));
+                        mock.setMode(mockException.getString("mode"));
+                        mock.setMsg(mockException.getString("msg"));
+                        mock.setPosition(mockException.getString("position"));
+                        mock.setInvokePosition(mockException.getString("invokePosition"));
+                        mock.setTimeout(mockException.getInteger("timeout"));
+                        mock.setKey(key);
+                        list.add(mock);
+                        break;
+                    }
+                    case "http": {
+                        HttpMock mock;
+                        mock = mapper.readValue(sbasicData, HttpMock.class);//Json对象转为实体对象
+                        mock.setType(mockException.getString("type"));
+                        mock.setMode(mockException.getString("mode"));
+                        mock.setMsg(mockException.getString("msg"));
+                        mock.setPosition(mockException.getString("position"));
+                        mock.setInvokePosition(mockException.getString("invokePosition"));
+                        mock.setTimeout(mockException.getInteger("timeout"));
+                        mock.setKey(key);
+                        list.add(mock);
+                        break;
+                    }
                 }
             }
             return list;
         } else {
-            return getCheckValid(providerId, msCode, version, env, file);
+            return getCheckValid(providerId, msCode, env);
         }
     }
 
     /**
      * 向指定配置文件中写入数据
      *
-     * @param mock       实体类用于承接桩信息
-     * @param providerId 租户id
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param mock    实体类用于承接桩信息
+     * @param request 租户id
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      * @return 返回添加信息
      */
     @RequestMapping("addMock")
     @ResponseBody
-    public Object addMock(Mock mock, String providerId, String msCode, String version, String env, String file) throws IOException {
+    public Object addMock(Mock mock, HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        String providerId = getProviderId(request);
         //首先获取文件内容（JSONObject对象）
-        if (addCheckValid(mock, providerId, msCode, version, env, file).equals("success")) {
+        if (addCheckValid(mock, providerId, msCode, env).equals("success")) {
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             String fileString;
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
@@ -210,6 +239,7 @@ public class MockController {
                     temp.put("className", mock.getClassName());
                     temp.put("methodName", mock.getMethodName());
                     temp.put("paramTypeList", mock.getParamTypeList());
+                    temp.put("action", mock.getAction());
                     mockException.put("basicData", temp);
                     break;
                 }
@@ -242,27 +272,34 @@ public class MockController {
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            return postFile(requestString, updateUrl, providerId);
+            return postFile(requestString, updateUrl);
         } else {
-            return addCheckValid(mock, providerId, msCode, version, env, file);
+            return addCheckValid(mock, providerId, msCode, env);
         }
     }
 
     /**
      * 根据key删除指定的打桩数据
      *
-     * @param mock       实体类，需要的是里面的key
-     * @param providerId 租户id
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param mock    实体类，需要的是里面的key
+     * @param request 用于获取租户id
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      */
     @RequestMapping("removeMock")
     @ResponseBody
-    public Object removeMock(Mock mock, String providerId, String msCode, String version, String env, String file) throws IOException {
+    public Object removeMock(Mock mock, HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        String providerId = getProviderId(request);
         //首先获取文件内容（JSONObject对象）
-        if (removeCheckValid(mock, providerId, msCode, version, env, file).equals("success")) {
+        if (removeCheckValid(mock, providerId, msCode, env).equals("success")) {
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             String fileString;
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
@@ -306,26 +343,52 @@ public class MockController {
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            return postFile(requestString, updateUrl, providerId);
+            return postFile(requestString, updateUrl);
         } else {
-            return removeCheckValid(mock, providerId, msCode, version, env, file);
+            return removeCheckValid(mock, providerId, msCode, env);
         }
+    }
+
+    /**
+     * 修改桩信息
+     *
+     * @param mock    桩信息实体类
+     * @param request 用于获取微服务租户id
+     * @param msCode  微服务编码
+     * @param version 微服务版本
+     * @param env     环境id
+     * @param file    配置文件名
+     * @return
+     * @throws IOException
+     */
+    @RequestMapping("changeMock")
+    @ResponseBody
+    public Object changeMock(Mock mock, HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        removeMock(mock, request, msCode, version, env, file);
+        return addMock(mock, request, msCode, version, env, file);
     }
 
     /**
      * 清空配置文件内容
      *
-     * @param providerId 租户id
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param request 用于获取租户id
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      */
     @RequestMapping("clearFile")
     @ResponseBody
-    public Object clearFile(String providerId, String msCode, String version, String env, String file) throws IOException {
+    public Object clearFile(HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        String providerId = getProviderId(request);
         //下面组装请求的json
-        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+        if (getCheckValid(providerId, msCode, env).equals("success")) {
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             JSONObject requestJson = new JSONObject();
             //微服务编码
             requestJson.put("serviceCode", msCode);
@@ -342,32 +405,35 @@ public class MockController {
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
             String result;
-            try {
-                result = postFile(requestString, updateUrl, providerId);
-            } catch (NullPointerException e) {
-                return "删除失败，无效的租户id";
-            }
+            result = postFile(requestString, updateUrl);
             return result;
         } else {
-            return getCheckValid(providerId, msCode, version, env, file);
+            return getCheckValid(providerId, msCode, env);
         }
     }
 
     /**
      * 仅删除mock内容
      *
-     * @param providerId 租户id
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param request 获取providerId
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      */
     @RequestMapping("clearMock")
     @ResponseBody
-    public Object clearMock(String providerId, String msCode, String version, String env, String file) throws IOException {
+    public Object clearMock(HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        String providerId = getProviderId(request);
         //首先获取文件内容（JSONObject对象）
-        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+        if (getCheckValid(providerId, msCode, env).equals("success")) {
             String fileString;
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
             } catch (NullPointerException e) {
@@ -405,26 +471,35 @@ public class MockController {
             contentListArr.add(contentListObj);
             requestJson.put("contentList", contentListArr);
             String requestString = requestJson.toJSONString();
-            return postFile(requestString, updateUrl, providerId);
+            return postFile(requestString, updateUrl);
         } else {
-            return getCheckValid(providerId, msCode, version, env, file);
+            return getCheckValid(providerId, msCode, env);
         }
     }
 
     /**
      * 读取文件内容
      *
-     * @param providerId 实体类，需要的是里面的租户id
-     * @param msCode     微服务编码
-     * @param version    配置文件版本
-     * @param env        环境名称
-     * @param file       配置文件名称
+     * @param request 读取cookie中的providerId
+     * @param msCode  微服务编码
+     * @param version 配置文件版本
+     * @param env     环境名称
+     * @param file    配置文件名称
      */
     @RequestMapping("getFile")
     @ResponseBody
-    public Object getFile(String providerId, String msCode, String version, String env, String file) throws IOException {
-        if (getCheckValid(providerId, msCode, version, env, file).equals("success")) {
+    public Object getFile(HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
+        //参数完整性
+        String providerId = getProviderId(request);
+        if (getCheckValid(providerId, msCode, env).equals("success")) {
+            if (version == null || version.trim().equals("")) {
+                version = "1.0.0";
+            }
+            if (file == null || file.trim().equals("")) {
+                file = "mwclient.json";
+            }
             String fileString;
+            //验证租户id
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);
             } catch (NullPointerException e) {
@@ -432,7 +507,7 @@ public class MockController {
             }
             return fileString;
         } else {
-            return getCheckValid(providerId, msCode, version, env, file);
+            return getCheckValid(providerId, msCode, env);
         }
     }
 }
