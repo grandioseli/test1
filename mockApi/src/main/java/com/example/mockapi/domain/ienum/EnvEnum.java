@@ -47,7 +47,6 @@ public enum EnvEnum {
      * 根据环境名称获取对应id
      *
      * @param name 环境名称
-     * @return
      */
     public static Integer getIdByName(String name) {
         for (EnvEnum envenum : values()) {

@@ -257,8 +257,6 @@ public class MockController {
      * @param version    配置文件版本
      * @param env        环境名称
      * @param file       配置文件名称
-     * @return
-     * @throws IOException
      */
     @RequestMapping("removeMock")
     @ResponseBody
@@ -322,8 +320,6 @@ public class MockController {
      * @param version    配置文件版本
      * @param env        环境名称
      * @param file       配置文件名称
-     * @return
-     * @throws IOException
      */
     @RequestMapping("clearFile")
     @ResponseBody
@@ -365,8 +361,6 @@ public class MockController {
      * @param version    配置文件版本
      * @param env        环境名称
      * @param file       配置文件名称
-     * @return
-     * @throws IOException
      */
     @RequestMapping("clearMock")
     @ResponseBody
@@ -425,8 +419,6 @@ public class MockController {
      * @param version    配置文件版本
      * @param env        环境名称
      * @param file       配置文件名称
-     * @return
-     * @throws IOException
      */
     @RequestMapping("getFile")
     @ResponseBody
@@ -438,7 +430,7 @@ public class MockController {
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
-            return JSON.parseObject(fileString);
+            return fileString;
         } else {
             return getCheckValid(providerId, msCode, version, env, file);
         }

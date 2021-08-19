@@ -38,7 +38,6 @@ public enum AuthEnum {
      * 根据租户id获取accessSecret
      *
      * @param providerId 微服务租户id
-     * @return
      */
     public static String getAccessSecretByProviderId(String providerId) {
         for (AuthEnum authenum : values()) {
