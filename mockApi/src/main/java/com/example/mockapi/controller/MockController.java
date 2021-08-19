@@ -85,7 +85,6 @@ public class MockController {
             }
             JSONObject ytsMock = fileJSON.getJSONObject("yts.mock");
             //这里的做法是yts.mock中的每一项都是一个打桩数据（key:mockKey,value:mockException，仍然是一个json对象），将它的keyset提取出来并遍历
-            //由于key可能是拼接而成的，因此不对外层的json做转化，只对内层的value做转化，将key进行手赋值
             Iterator<String> its = ytsMock.keySet().iterator();
             List<BaseMock> list = new ArrayList<>();
             while (its.hasNext()) {
