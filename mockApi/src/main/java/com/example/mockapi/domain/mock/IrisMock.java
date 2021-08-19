@@ -11,6 +11,7 @@ import java.util.List;
  * className iris模式下：类名
  * methodName iris模式下：方法名
  * paramTypeList iris模式下：方法参数列表形如["java.lang.String","java.lang.String"]
+ * action iris模式下:阶段
  */
 @Data
 public class IrisMock extends BaseMock {
