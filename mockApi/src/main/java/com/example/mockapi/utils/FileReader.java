@@ -14,7 +14,7 @@ import java.io.*;
 /**
  * 对文件的各个操作
  */
-public class FileReaderUtil {
+public class FileReader {
     /**
      * 向指定微服务配置文件请求文件内容
      *

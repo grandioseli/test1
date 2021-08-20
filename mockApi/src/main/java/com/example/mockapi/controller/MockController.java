@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.*;
 
-import static com.example.mockapi.utils.FileReaderUtil.*;
+import static com.example.mockapi.utils.FileReader.*;
 
 @Controller
 @RequestMapping("/yts/")
