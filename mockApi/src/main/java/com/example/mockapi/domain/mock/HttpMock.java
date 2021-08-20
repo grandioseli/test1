@@ -12,4 +12,5 @@ import lombok.Data;
 public class HttpMock extends BaseMock {
     private String httpUrl;
     private String action;
+
 }

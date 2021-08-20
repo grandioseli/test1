@@ -46,7 +46,16 @@ public class Mock {
     private String methodName;
     private List<String> paramTypeList;
     private String httpUrl;
-
+//action默认为execute
+    public String getAction()
+    {
+        if(this.action==null||this.action.trim().equals(""))
+        {
+            return "execute";
+        }
+        else
+            return this.action;
+    }
     public void setKeyByMode() {
         switch (this.mode) {
             case "mdd":

@@ -18,4 +18,5 @@ public class MddMock extends BaseMock {
     private String act;
     private String ruleId;
     private String action;
+
 }
