@@ -357,14 +357,14 @@ public class MockController {
      * @param version 微服务版本
      * @param env     环境id
      * @param file    配置文件名
-     * @return
-     * @throws IOException
      */
     @RequestMapping("changeMock")
     @ResponseBody
     public Object changeMock(Mock mock, HttpServletRequest request, String msCode, String version, String env, String file) throws IOException {
-        removeMock(mock, request, msCode, version, env, file);
-        return addMock(mock, request, msCode, version, env, file);
+        if (JSON.parseObject((String) removeMock(mock, request, msCode, version, env, file)).get("success").equals("true"))
+            return addMock(mock, request, msCode, version, env, file);
+        else
+            return "编辑错误";
     }
 
     /**
@@ -387,6 +387,10 @@ public class MockController {
             }
             if (file == null || file.trim().equals("")) {
                 file = "mwclient.json";
+            }
+            //如果是生产环境和沙箱环境就直接报错
+            if (env.equals("online") || env.equals("sandbox") || env.equals("online-ap-sg1") || env.equals("online-cn-ecology")) {
+                return "修改失败：该环境不允许修改";
             }
             JSONObject requestJson = new JSONObject();
             //微服务编码
@@ -432,6 +436,9 @@ public class MockController {
             }
             if (file == null || file.trim().equals("")) {
                 file = "mwclient.json";
+            }
+            if (env.equals("online") || env.equals("sandbox") || env.equals("online-ap-sg1") || env.equals("online-cn-ecology")) {
+                return "删除失败：该环境不允许修改";
             }
             try {
                 fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file);

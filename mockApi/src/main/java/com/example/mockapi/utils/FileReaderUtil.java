@@ -89,6 +89,11 @@ public class FileReaderUtil {
                 env == null || env.trim().equals("")) {
             return "参数不能为空";
         }
+        //如果是生产环境和沙箱环境就直接报错
+        if(env.equals("online")||env.equals("sandbox")||env.equals("online-ap-sg1")||env.equals("online-cn-ecology"))
+        {
+            return "写入失败：该环境不允许修改";
+        }
         if (mock.getMode().equals("mdd")) {
             if (mock.getTenantId() == null || mock.getTenantId().trim().equals("") ||
                     mock.getRuleId() == null || mock.getRuleId().trim().equals("") ||
@@ -127,6 +132,11 @@ public class FileReaderUtil {
                 msCode == null || msCode.trim().equals("") ||
                 env == null || env.trim().equals("")) {
             return "参数不能为空";
+        }
+        //如果是生产环境和沙箱环境就直接报错
+        if(env.equals("online")||env.equals("sandbox")||env.equals("online-ap-sg1")||env.equals("online-cn-ecology"))
+        {
+            return "删除失败：该环境不允许修改";
         }
         return "success";
     }
