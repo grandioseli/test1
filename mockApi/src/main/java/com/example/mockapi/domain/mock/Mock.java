@@ -46,16 +46,15 @@ public class Mock {
     private String methodName;
     private List<String> paramTypeList;
     private String httpUrl;
-//action默认为execute
-    public String getAction()
-    {
-        if(this.action==null||this.action.trim().equals(""))
-        {
+
+    //action默认为execute
+    public String getAction() {
+        if (this.action == null || this.action.trim().equals("")) {
             return "execute";
-        }
-        else
+        } else
             return this.action;
     }
+
     public void setKeyByMode() {
         switch (this.mode) {
             case "mdd":
@@ -73,7 +72,7 @@ public class Mock {
                 }
                 break;
             case "iris":
-                if(paramTypeList!=null) {
+                if (paramTypeList != null) {
                     StringBuilder params = new StringBuilder();
                     for (String param : paramTypeList) {
                         params.append(param).append(',');
@@ -82,10 +81,8 @@ public class Mock {
                         params = new StringBuilder(params.substring(0, params.length() - 1));
                     }
                     key = packageName + '.' + className + '.' + methodName + '(' + params + ')';
-                }
-                else
-                {
-                    key = packageName + '.' + className + '.' + methodName+"()";
+                } else {
+                    key = packageName + '.' + className + '.' + methodName + "()";
                 }
                 break;
         }

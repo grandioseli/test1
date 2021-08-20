@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * 用于填入列表的基础桩
- *
+ * <p>
  * type 异常类型，取值crash服务宕机,sql数据库保存失败,timeout超时网络抖动
  * msg 信息
  * position 位置放在操作前还是操作后，取值front或者rear

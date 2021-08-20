@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * mdd类型的桩
- *
+ * <p>
  * tenantId mdd模式下：租户id
  * documentType mdd模式下：单据类型
  * act mdd模式下：动作
