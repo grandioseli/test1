@@ -58,14 +58,14 @@ public class Mock {
     public void setKeyByMode() {
         switch (this.mode) {
             case "mdd":
-                if (action != null && action.equals("cancel")) {
+                if (action != null && (action.equals("cancel") || action.equals("confirm"))) {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId + '_' + action;
                 } else {
                     key = tenantId + '_' + documentType + '_' + act + '_' + ruleId;
                 }
                 break;
             case "http":
-                if (action != null && action.equals("cancel")) {
+                if (action != null && (action.equals("cancel") || action.equals("confirm"))) {
                     key = action + '_' + httpUrl;
                 } else {
                     key = httpUrl;
