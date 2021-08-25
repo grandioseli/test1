@@ -15,6 +15,7 @@ import java.io.*;
  * 对文件的各个操作
  */
 public class FileReader {
+
     /**
      * 向指定微服务配置文件请求文件内容
      *
@@ -27,9 +28,9 @@ public class FileReader {
      * @return 返回JSON字符串
      * @throws IOException
      */
-    public static Object readFile(String mockUrl, String providerId, String msCode, String version, String env, String file) throws NullPointerException, IOException {
+    public static Object readFile(String mockUrl, String providerId, String msCode, String version, String env, String file,String accessKey,String accessSecret) throws NullPointerException, IOException {
         String url = mockUrl + "?groupid=" + providerId + "&app=" + msCode + "&version=" + version + "&env=" + env + "&key=" + file;
-        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", url)
+        Request request = PostMan.getAuthedBuilder(accessKey, accessSecret, url)
                 .get()
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -45,9 +46,9 @@ public class FileReader {
      * @return
      * @throws IOException
      */
-    public static String postFile(String bodyString, String url) throws IOException, NullPointerException {
+    public static String postFile(String bodyString, String url,String accessKey,String accessSecret) throws IOException, NullPointerException {
         okhttp3.RequestBody body = okhttp3.RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyString);
-        Request request = PostMan.getAuthedBuilder("TvDTf0rUs0l5n8rA", "uIu0YdD4ZflTD5WYZQVALLfFp9SkQh", url)
+        Request request = PostMan.getAuthedBuilder(accessKey, accessSecret, url)
                 .post(body)
                 .build();
         Call call = PostMan.getInstance().newCall(request);
@@ -143,7 +144,7 @@ public class FileReader {
         Cookie[] cookies = request.getCookies();
         String providerId = "";
         for (Cookie cookie : cookies) {
-            if ("providerId".equals(cookie.getName())) {
+            if ("u_providerid".equals(cookie.getName())) {
                 try {
                     providerId = java.net.URLDecoder.decode(
                             cookie.getValue(), "utf-8");
