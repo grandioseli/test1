@@ -21,8 +21,11 @@ import static com.example.mockapi.utils.FileReader.*;
 @RequestMapping("/governance/yts/")
 public class MockController {
     //查询接口
-    @Value("${yts.http.query.url}")
-    private String queryUrl;
+    @Value("${yts.http.query.fileUrl}")
+    private String fileUrl;
+    //查询接口
+    @Value("${yts.http.query.fileListUrl}")
+    private String fileListUrl;
     //更新接口
     @Value("${yts.http.update.url}")
     private String updateUrl;
@@ -56,9 +59,10 @@ public class MockController {
             String file = "mwclient.json";
             ObjectMapper mapper = new ObjectMapper();
             String fileString;
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             //尝试读取文件
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
@@ -183,8 +187,9 @@ public class MockController {
             ObjectMapper mapper = new ObjectMapper();
             String fileString;
             //尝试读取文件
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
@@ -274,6 +279,18 @@ public class MockController {
                             list.add(mock);
                             break;
                         }
+                        default:{
+                            BaseMock mock = new BaseMock();
+                            mock.setType(mockException.getString("type"));
+                            mock.setMode(mockException.getString("mode"));
+                            mock.setMsg(mockException.getString("msg"));
+                            mock.setPosition(mockException.getString("position"));
+                            mock.setInvokePosition(mockException.getString("invokePosition"));
+                            mock.setTimeout(mockException.getInteger("timeout"));
+                            mock.setKey(key);
+                            list.add(mock);
+                            break;
+                        }
                     }
                 }
             }
@@ -286,6 +303,8 @@ public class MockController {
     /**
      * 向指定配置文件中写入数据
      *
+     * @param mockjson 前端传的json字符串，里面包含了所需的信息
+     * @param request  从中获取providerid
      * @return 返回添加信息
      */
     @RequestMapping("addMock")
@@ -325,8 +344,9 @@ public class MockController {
             }
             String file = "mwclient.json";
             String fileString;
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "写入失败：无效的租户id";
             }
@@ -414,6 +434,9 @@ public class MockController {
                     mockException.put("basicData", temp);
                     break;
                 }
+                default: {
+                    return "写入失败：无效的打桩模式";
+                }
             }
             //原先的yts.mock的value
             JSONObject jsonObject = fileJSON.getJSONObject("yts.mock");
@@ -444,6 +467,9 @@ public class MockController {
 
     /**
      * 根据key删除指定的打桩数据
+     *
+     * @param mockjson 前端传的json字符串，里面包含了所需的信息
+     * @param request  从中获取providerid
      */
     @RequestMapping("removeMock")
     @ResponseBody
@@ -482,8 +508,9 @@ public class MockController {
             }
             String file = "mwclient.json";
             String fileString;
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "删除失败：无效的租户id";
             }
@@ -539,7 +566,10 @@ public class MockController {
     }
 
     /**
-     * 修改桩信息
+     * 根据key重新编辑桩信息
+     *
+     * @param mockJson 前端传的json字符串，里面包含了所需的信息
+     * @param request  从中获取providerid
      */
     @RequestMapping("changeMock")
     @ResponseBody
@@ -552,6 +582,9 @@ public class MockController {
 
     /**
      * 清空配置文件内容
+     *
+     * @param mockjson 前端传的json字符串，里面包含了所需的信息
+     * @param request  从中获取providerid
      */
     @RequestMapping("clearFile")
     @ResponseBody
@@ -600,6 +633,9 @@ public class MockController {
 
     /**
      * 仅删除mock内容
+     *
+     * @param mockjson 前端传的json字符串，里面包含了所需的信息
+     * @param request  从中获取providerid
      */
     @RequestMapping("clearMock")
     @ResponseBody
@@ -623,8 +659,9 @@ public class MockController {
             if (env.equals("online") || env.equals("sandbox") || env.equals("online-ap-sg1") || env.equals("online-cn-ecology")) {
                 return "删除失败：该环境不允许修改";
             }
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "删除失败：无效的租户id";
             }
@@ -694,8 +731,9 @@ public class MockController {
             String file = "mwclient.json";
             String fileString;
             //验证租户id
+            readFile(fileUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             try {
-                fileString = (String) readFile(queryUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
+                fileString = (String) readFile(fileListUrl, providerId, msCode, version, env, file, accessKey, accessSecret);
             } catch (NullPointerException e) {
                 return "获取失败：无效的租户id";
             }
