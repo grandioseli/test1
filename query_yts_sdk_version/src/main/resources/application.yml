@@ -1,0 +1,15 @@
+spring:
+  profiles: test
+  datasource:
+  microservice:
+    hikari:
+      jdbc-url: jdbc:mysql://172.20.53.197:3306/microservice?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&rewriteBatchedStatements=true
+      username: root
+      password: Ufsoft*123
+      minimum-idle: 5
+      maximum-pool-size: 200
+      idle-timeout: 30000
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: select 1
