@@ -21,14 +21,16 @@ public class MicroServiceV1Impl implements MicroServiceV1 {
 	MicroServiceMapper microServiceMapper;
 
 	@Override
-	public MicroServicePo getInfoByServiceName(String serviceName) {
-		MicroServicePo microServicePo =  microServiceMapper.getInfoByServiceName(serviceName);
-		microServicePo = ParamUtils.escapeForObject(microServicePo);
-		return microServicePo;
+	public List<MicroServicePo> getInfoByServiceNameAndEnv(String serviceName,String env) {
+		return  microServiceMapper.getInfoByServiceNameAndEnv(serviceName,env);
+	}
+	@Override
+	public List<MicroServicePo> getInfoByServiceName(String serviceName) {
+		return  microServiceMapper.getInfoByServiceName(serviceName);
 	}
 
 	@Override
-	public MicroServicePo getInfoByEnv(String env) {
+	public List<MicroServicePo> getInfoByEnv(String env) {
 		return microServiceMapper.getInfoByEnv(env);
 	}
 

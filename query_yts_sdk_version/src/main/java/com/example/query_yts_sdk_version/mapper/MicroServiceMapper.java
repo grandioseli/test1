@@ -9,14 +9,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 @Repository
-@Mapper
+
 public interface MicroServiceMapper {
-	
+	@Select("SELECT * FROM yts_sdk_version WHERE service_name = #{serviceName} AND env =#{env}")
+	List<MicroServicePo> getInfoByServiceNameAndEnv(@Param("serviceName") String serviceName,@Param("env") String env);
+
 	@Select("SELECT * FROM yts_sdk_version WHERE service_name = #{serviceName}")
-	MicroServicePo getInfoByServiceName(@Param("serviceName") String serviceName);
+	List<MicroServicePo> getInfoByServiceName(@Param("serviceName") String serviceName);
 	
 	@Select("SELECT * FROM yts_sdk_version WHERE env = #{env}")
-	MicroServicePo getInfoByEnv(@Param("env") String env);
+	List<MicroServicePo> getInfoByEnv(@Param("env") String env);
 	
 	@Select("SELECT * FROM yts_sdk_version")
 	List<MicroServicePo> getMicroServiceList();

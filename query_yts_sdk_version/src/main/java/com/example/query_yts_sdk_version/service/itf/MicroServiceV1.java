@@ -8,9 +8,11 @@ import java.util.List;
 
 
 public interface MicroServiceV1 {
-	MicroServicePo getInfoByServiceName(@Param("serviceName") String serviceName);
+	List<MicroServicePo> getInfoByServiceNameAndEnv(@Param("env")String env,@Param("serviceName")String serviceName);
+
+	List<MicroServicePo> getInfoByServiceName(@Param("serviceName") String serviceName);
 	
-	MicroServicePo getInfoByEnv(@Param("env") String env);
+	List<MicroServicePo> getInfoByEnv(@Param("env") String env);
 	
 	List<MicroServicePo> getMicroServiceList();
 
